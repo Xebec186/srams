@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { FiFlag, FiEye, FiEyeOff } from "react-icons/fi";
 
 const ROLE_REDIRECTS = {
@@ -12,21 +13,23 @@ const ROLE_REDIRECTS = {
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { error: toastError } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
     try {
       const user = await login(form.username, form.password);
       navigate(ROLE_REDIRECTS[user.role] || "/");
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid username or password.");
+      toastError(
+        err.response?.data?.message || "Invalid username or password.",
+        "Sign in failed",
+      );
     } finally {
       setLoading(false);
     }
@@ -76,8 +79,6 @@ export default function LoginPage() {
           <p className="login-form-subtitle text-sm text-neutral-500 mb-6">
             Enter your credentials to access the system.
           </p>
-
-          {error && <div className="text-red-500 mb-2">{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">

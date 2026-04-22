@@ -1,5 +1,7 @@
 package com.srams.service;
 
+import com.srams.dto.request.CreateAcademicYearRequest;
+import com.srams.dto.request.CreateTermRequest;
 import com.srams.dto.response.AcademicYearResponse;
 import com.srams.dto.response.TermResponse;
 
@@ -11,4 +13,10 @@ public interface AcademicYearService {
     AcademicYearResponse getCurrentAcademicYear();
 
     List<TermResponse> getTerms(Long academicYearId);
+
+    AcademicYearResponse createAcademicYear(CreateAcademicYearRequest request);
+
+    void setCurrentAcademicYear(Long academicYearId);
+
+    TermResponse createTerm(Long academicYearId, CreateTermRequest request);
 }

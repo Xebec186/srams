@@ -37,8 +37,18 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (username, password) => {
     const res = await authApi.login({ username, password });
-    const { token, refreshToken, role, fullName } = res.data;
-    const userData = { token, refreshToken, role, fullName, username };
+    const { token, refreshToken, role, fullName, userId, schoolId, studentId } =
+      res.data;
+    const userData = {
+      token,
+      refreshToken,
+      role,
+      fullName,
+      userId,
+      schoolId,
+      studentId,
+      username,
+    };
     localStorage.setItem("srams_token", token);
     localStorage.setItem("srams_user", JSON.stringify(userData));
     setUser(userData);

@@ -54,6 +54,7 @@ public class SchoolServiceImpl implements SchoolService {
         return SchoolResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public SchoolResponse getSchoolById(Long id) {
         School s = schoolRepository.findById(id)
@@ -61,12 +62,14 @@ public class SchoolServiceImpl implements SchoolService {
         return SchoolResponse.from(s);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<SchoolResponse> getAllSchools(Pageable pageable) {
         return schoolRepository.findByActiveTrue(pageable)
                 .map(SchoolResponse::from);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<SchoolResponse> getSchoolsByRegion(Integer regionId) {
         return schoolRepository.findByRegionIdAndActiveTrue(regionId)

@@ -1,38 +1,42 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { studentsApi } from "../../api";
 import { PageHeader, Spinner } from "../../components/common";
 import { formatDate } from "../../utils";
-import { jwtDecode } from "jwt-decode";
 
 export default function StudentProfile() {
   const { user } = useAuth();
-  const token = user?.token;
-  // const decodedToken = jwtDecode(token);
-  // const studentId = decodedToken?.studentId;
-  const studentId = "111"; // Using mock student ID for testing
+  const { error: toastError } = useToast();
+  const studentId = user?.studentId;
 
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!studentId) return;
+    if (!studentId) {
+      setLoading(false);
+      const message = "Student profile is not linked to this account.";
+      setError(message);
+      toastError(message);
+      return;
+    }
     studentsApi
       .getById(studentId)
       .catch((err) => {
-        setError(err.response?.data?.message || "Failed to load profile.");
+        const message = err.response?.data?.message || "Failed to load profile.";
+        setError(message);
+        toastError(message);
       })
-      .then((r) => {
-        console.log("Student profile data:", r.data);
-        setStudent(r.data);
-      })
+      .then((r) => setStudent(r.data))
       .finally(() => setLoading(false));
   }, [studentId]);
 
   if (loading) return <Spinner center />;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error) return <div className="text-neutral-500">{error}</div>;
   if (!student) return <div>Profile not found.</div>;
+  const initial = (student.fullName || "?").trim().charAt(0).toUpperCase();
 
   return (
     <div>
@@ -43,7 +47,7 @@ export default function StudentProfile() {
 
       <div className="bg-primary-900 rounded-lg p-7 flex items-center gap-5 mb-6">
         <div className="w-18 h-18 rounded-full bg-primary-400 flex items-center justify-center text-2xl font-bold text-white">
-          {student.fullName?.charAt(0)}
+          {initial}
         </div>
         <div className="flex-1">
           <div className="text-xl font-bold text-white">{student.fullName}</div>

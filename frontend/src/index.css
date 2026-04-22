@@ -426,6 +426,48 @@
     @apply text-center py-12 px-6 text-neutral-500;
   }
 
+  /* Toasts */
+  .toast-stack {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(380px, calc(100vw - 32px));
+  }
+  .toast {
+    @apply rounded-md border shadow-md px-4 py-3 bg-white flex items-start justify-between gap-3;
+  }
+  .toast-content {
+    @apply min-w-0;
+  }
+  .toast-title {
+    @apply text-sm font-semibold text-neutral-900;
+  }
+  .toast-message {
+    @apply text-sm text-neutral-600;
+  }
+  .toast-close {
+    @apply text-neutral-400 hover:text-neutral-600 text-lg leading-none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .toast-success {
+    border-color: var(--color-success-100);
+  }
+  .toast-error {
+    border-color: var(--color-danger-100);
+  }
+  .toast-warning {
+    border-color: var(--color-warning-100);
+  }
+  .toast-info {
+    border-color: var(--color-info-100);
+  }
+
   /* Page utilities */
   .page-actions {
     @apply flex items-center gap-3;

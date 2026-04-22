@@ -34,6 +34,7 @@ public class StudentController {
     @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN','TEACHER')")
     public ResponseEntity<Page<StudentResponse>> list(
             @RequestParam(required = false) Long schoolId,
+            @RequestParam(required = false) Short gradeLevelId,
             @RequestParam(required = false) String q,
             Pageable pageable,
             @AuthenticationPrincipal User user) {
@@ -41,6 +42,9 @@ public class StudentController {
             return ResponseEntity.ok(studentService.searchAllStudents(q != null ? q : "", pageable));
         }
         Long scopedSchoolId = schoolId != null ? schoolId : user.getSchool().getId();
+        if (gradeLevelId != null) {
+            return ResponseEntity.ok(studentService.getStudentsBySchoolAndGrade(scopedSchoolId, gradeLevelId, q != null ? q : "", pageable));
+        }
         return ResponseEntity.ok(studentService.getStudentsBySchool(scopedSchoolId, q != null ? q : "", pageable));
     }
 

@@ -77,6 +77,7 @@ public class AcademicPerformanceServiceImpl implements AcademicPerformanceServic
         return PerformanceResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PerformanceResponse> getStudentTermResults(Long studentId, Long termId) {
         return performanceRepository.findByStudentIdAndTermId(studentId, termId)
@@ -85,6 +86,7 @@ public class AcademicPerformanceServiceImpl implements AcademicPerformanceServic
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PerformanceResponse> getClassResults(Long schoolId, Long gradeLevelId, Long termId) {
         return performanceRepository.findBySchoolIdAndTermIdAndGradeLevelId(schoolId, termId, gradeLevelId.shortValue())
@@ -93,6 +95,7 @@ public class AcademicPerformanceServiceImpl implements AcademicPerformanceServic
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ReportCardResponse generateReportCard(Long studentId, Long termId) {
         Student student = studentRepository.findById(studentId)

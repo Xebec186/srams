@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,6 +83,7 @@ public class UserServiceImpl implements UserService {
         return UserResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserResponse getUserById(Long id) {
         User u = userRepository.findById(id)
@@ -89,6 +91,7 @@ public class UserServiceImpl implements UserService {
         return UserResponse.from(u);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<UserResponse> getUsersBySchool(Long schoolId, Pageable pageable) {
         List<User> all = userRepository.findAll();
@@ -102,6 +105,32 @@ public class UserServiceImpl implements UserService {
         List<UserResponse> content = start <= end && start < total ?
                 filtered.subList(start, end).stream().map(UserResponse::from).collect(Collectors.toList()) : List.of();
 
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserResponse> getUsers(Pageable pageable, String role) {
+        Role parsedRole = null;
+        if (role != null && !role.isBlank()) {
+            try {
+                parsedRole = Role.valueOf(role.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException("Invalid role filter: " + role);
+            }
+        }
+        List<User> users = userRepository.findAll();
+        Role finalParsedRole = parsedRole;
+        List<User> filtered = parsedRole == null
+                ? users
+                : users.stream().filter(u -> u.getRole() == finalParsedRole).toList();
+
+        int total = filtered.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), total);
+        List<UserResponse> content = start <= end && start < total
+                ? filtered.subList(start, end).stream().map(UserResponse::from).toList()
+                : List.of();
         return new PageImpl<>(content, pageable, total);
     }
 

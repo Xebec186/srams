@@ -15,6 +15,7 @@ public interface StudentService {
     StudentResponse getStudentByUsid(String usid);
 
     Page<StudentResponse> getStudentsBySchool(Long schoolId, String query, Pageable pageable);
+    Page<StudentResponse> getStudentsBySchoolAndGrade(Long schoolId, Short gradeLevelId, String query, Pageable pageable);
 
     Page<StudentResponse> searchAllStudents(String query, Pageable pageable);
 

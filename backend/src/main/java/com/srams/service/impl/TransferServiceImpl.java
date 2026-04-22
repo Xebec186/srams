@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class TransferServiceImpl implements TransferService {
 
     private final TransferRequestRepository transferRepository;
@@ -34,6 +33,7 @@ public class TransferServiceImpl implements TransferService {
     private final SchoolRepository schoolRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public TransferResponse initiateTransfer(InitiateTransferRequest request, Long requestedByUserId) {
         Student student = studentRepository.findById(request.studentId())
@@ -64,6 +64,7 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional
     @Override
     public TransferResponse approveSending(Long transferId, Long approvedByUserId) {
         TransferRequest transfer = getTransferOrThrow(transferId);
@@ -78,6 +79,7 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional
     @Override
     public TransferResponse confirmReceiving(Long transferId, Long confirmedByUserId) {
         TransferRequest transfer = getTransferOrThrow(transferId);
@@ -92,6 +94,7 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional
     @Override
     public TransferResponse completeTransfer(Long transferId) {
         TransferRequest transfer = getTransferOrThrow(transferId);
@@ -108,6 +111,7 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional
     @Override
     public TransferResponse rejectTransfer(Long transferId, String reason, Long rejectedByUserId) {
         TransferRequest transfer = getTransferOrThrow(transferId);
@@ -121,11 +125,13 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TransferResponse getTransferById(Long id) {
         return TransferResponse.from(getTransferOrThrow(id));
     }
 
+    @Transactional
     @Override
     public TransferResponse cancelTransfer(Long transferId, Long cancelledByUserId) {
         TransferRequest transfer = getTransferOrThrow(transferId);
@@ -136,12 +142,14 @@ public class TransferServiceImpl implements TransferService {
         return TransferResponse.from(transferRepository.save(transfer));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TransferResponse> getTransfersByStudent(Long studentId) {
         return transferRepository.findByStudentId(studentId).stream()
                 .map(TransferResponse::from).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TransferResponse> getTransfersBySchool(Long schoolId, TransferStatus status, String direction) {
         return transferRepository.findAll().stream()

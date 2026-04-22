@@ -24,7 +24,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
@@ -33,6 +32,7 @@ public class StudentServiceImpl implements StudentService {
     private final UserRepository userRepository;
     private final RegionRepository regionRepository;
 
+    @Transactional
     @Override
     public StudentResponse registerStudent(CreateStudentRequest request, Long createdByUserId) {
         School school = schoolRepository.findById(request.schoolId())
@@ -65,6 +65,7 @@ public class StudentServiceImpl implements StudentService {
         return StudentResponse.from(saved);
     }
 
+    @Transactional
     @Override
     public String generateUsid(Long schoolId, int enrollmentYear) {
         School school = schoolRepository.findById(schoolId)
@@ -92,6 +93,7 @@ public class StudentServiceImpl implements StudentService {
         return candidate;
     }
 
+    @Transactional
     @Override
     public void updateStudentStatus(Long id, com.srams.enums.StudentStatus status) {
         Student student = studentRepository.findById(id)
@@ -100,6 +102,7 @@ public class StudentServiceImpl implements StudentService {
         studentRepository.save(student);
     }
 
+    @Transactional
     @Override
     public StudentResponse updateStudent(Long id, UpdateStudentRequest request) {
         Student student = studentRepository.findById(id)
@@ -117,6 +120,7 @@ public class StudentServiceImpl implements StudentService {
         return StudentResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public StudentResponse getStudentById(Long id) {
         Student student = studentRepository.findById(id)
@@ -124,6 +128,7 @@ public class StudentServiceImpl implements StudentService {
         return StudentResponse.from(student);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public StudentResponse getStudentByUsid(String usid) {
         Student student = studentRepository.findByUsid(usid)
@@ -131,12 +136,21 @@ public class StudentServiceImpl implements StudentService {
         return StudentResponse.from(student);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<StudentResponse> getStudentsBySchool(Long schoolId, String query, Pageable pageable) {
         return studentRepository.searchBySchool(schoolId, query, pageable)
                 .map(StudentResponse::from);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<StudentResponse> getStudentsBySchoolAndGrade(Long schoolId, Short gradeLevelId, String query, Pageable pageable) {
+        return studentRepository.searchBySchoolAndGrade(schoolId, gradeLevelId, query, pageable)
+                .map(StudentResponse::from);
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public Page<StudentResponse> searchAllStudents(String query, Pageable pageable) {
         return studentRepository.searchAll(query, pageable)

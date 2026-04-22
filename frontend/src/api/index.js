@@ -1,8 +1,5 @@
 // src/api/client.js
 import axios from "axios";
-import * as mockApi from "./mockApi";
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 const client = axios.create({
   baseURL: BASE_URL,
@@ -125,7 +122,7 @@ const realAuthApi = {
     refreshClient.post("/auth/refresh", { refreshToken }),
   changePassword: (data) => client.put("/auth/change-password", data),
 };
-export const authApi = USE_MOCK ? mockApi.authApi : realAuthApi;
+export const authApi = realAuthApi;
 
 // ============================================================
 // Students API
@@ -137,7 +134,7 @@ const realStudentsApi = {
   create: (data) => client.post("/students", data),
   update: (id, data) => client.put(`/students/${id}`, data),
 };
-export const studentsApi = USE_MOCK ? mockApi.studentsApi : realStudentsApi;
+export const studentsApi = realStudentsApi;
 
 // ============================================================
 // Attendance API
@@ -153,9 +150,7 @@ const realAttendanceApi = {
   getSchoolReport: (schoolId, params) =>
     client.get(`/attendance/school/${schoolId}/report`, { params }),
 };
-export const attendanceApi = USE_MOCK
-  ? mockApi.attendanceApi
-  : realAttendanceApi;
+export const attendanceApi = realAttendanceApi;
 
 // ============================================================
 // Academic Performance API
@@ -168,9 +163,7 @@ const realPerformanceApi = {
     client.get(`/performance/student/${studentId}/term/${termId}/report-card`),
   getClassResults: (params) => client.get("/performance/class", { params }),
 };
-export const performanceApi = USE_MOCK
-  ? mockApi.performanceApi
-  : realPerformanceApi;
+export const performanceApi = realPerformanceApi;
 
 // ============================================================
 // Transfers API
@@ -186,7 +179,7 @@ const realTransfersApi = {
     client.get(`/transfers/school/${schoolId}`, { params }),
   getById: (id) => client.get(`/transfers/${id}`),
 };
-export const transfersApi = USE_MOCK ? mockApi.transfersApi : realTransfersApi;
+export const transfersApi = realTransfersApi;
 
 // ============================================================
 // Schools API
@@ -198,7 +191,7 @@ const realSchoolsApi = {
   update: (id, data) => client.put(`/schools/${id}`, data),
   getByRegion: (regionId) => client.get(`/schools/region/${regionId}`),
 };
-export const schoolsApi = USE_MOCK ? mockApi.schoolsApi : realSchoolsApi;
+export const schoolsApi = realSchoolsApi;
 
 // ============================================================
 // Users API
@@ -210,7 +203,7 @@ const realUsersApi = {
   update: (id, data) => client.put(`/users/${id}`, data),
   deactivate: (id) => client.put(`/users/${id}/deactivate`),
 };
-export const usersApi = USE_MOCK ? mockApi.usersApi : realUsersApi;
+export const usersApi = realUsersApi;
 
 // ============================================================
 // Reference Data API
@@ -223,5 +216,5 @@ const realReferenceApi = {
   getCurrentYear: () => client.get("/academic-years/current"),
   getTerms: (yearId) => client.get(`/academic-years/${yearId}/terms`),
 };
-export const referenceApi = USE_MOCK ? mockApi.referenceApi : realReferenceApi;
+export const referenceApi = realReferenceApi;
 

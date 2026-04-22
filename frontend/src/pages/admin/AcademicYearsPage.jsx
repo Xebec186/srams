@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { referenceApi } from '../../api';
 import { PageHeader, Spinner, Badge, Modal, EmptyState } from '../../components/common';
+import { useToast } from '../../context/ToastContext';
 import { formatDate } from '../../utils';
 import client from '../../api';
 
@@ -9,6 +10,7 @@ const EMPTY_YEAR = { label: '', startDate: '', endDate: '' };
 const EMPTY_TERM = { termNumber: 1, startDate: '', endDate: '' };
 
 export default function AcademicYearsPage() {
+  const { success, error: toastError } = useToast();
   const [years, setYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showYearForm, setShowYearForm] = useState(false);
@@ -17,7 +19,6 @@ export default function AcademicYearsPage() {
   const [yearForm, setYearForm] = useState(EMPTY_YEAR);
   const [termForm, setTermForm] = useState(EMPTY_TERM);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -33,33 +34,38 @@ export default function AcademicYearsPage() {
   const setT = f => e => setTermForm(v => ({ ...v, [f]: e.target.value }));
 
   const handleAddYear = async (e) => {
-    e.preventDefault(); setError(''); setSaving(true);
+    e.preventDefault(); setSaving(true);
     try {
       await client.post('/academic-years', yearForm);
+      success('Academic year created successfully.');
       setShowYearForm(false); setYearForm(EMPTY_YEAR); load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create academic year.');
+      toastError(err.response?.data?.message || 'Failed to create academic year.');
     } finally { setSaving(false); }
   };
 
   const handleSetCurrent = async (yearId) => {
     try {
       await client.put(`/academic-years/${yearId}/set-current`);
+      success('Current academic year updated.');
       load();
-    } catch {}
+    } catch (err) {
+      toastError(err.response?.data?.message || 'Failed to set current year.');
+    }
   };
 
   const handleAddTerm = async (e) => {
-    e.preventDefault(); setError(''); setSaving(true);
+    e.preventDefault(); setSaving(true);
     try {
       await client.post(`/academic-years/${selectedYear.id}/terms`, {
         termNumber: Number(termForm.termNumber),
         startDate: termForm.startDate,
         endDate: termForm.endDate,
       });
+      success('Term added successfully.');
       setShowTermForm(false); setTermForm(EMPTY_TERM); load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add term.');
+      toastError(err.response?.data?.message || 'Failed to add term.');
     } finally { setSaving(false); }
   };
 
@@ -96,7 +102,6 @@ export default function AcademicYearsPage() {
                   <button className="btn btn-primary btn-sm" onClick={() => {
                     setSelectedYear(year);
                     setShowTermForm(true);
-                    setError('');
                   }}>
                     + Add Term
                   </button>
@@ -147,7 +152,6 @@ export default function AcademicYearsPage() {
             </button>
           </>
         }>
-        {error && <div className="alert alert-danger">{error}</div>}
         <div className="form-group">
           <label className="form-label">Label (e.g. 2024/2025) *</label>
           <input className="form-control" value={yearForm.label} onChange={setY('label')}
@@ -178,7 +182,6 @@ export default function AcademicYearsPage() {
             </button>
           </>
         }>
-        {error && <div className="alert alert-danger">{error}</div>}
         <div className="form-group">
           <label className="form-label">Term Number *</label>
           <select className="form-control" value={termForm.termNumber} onChange={setT('termNumber')}>

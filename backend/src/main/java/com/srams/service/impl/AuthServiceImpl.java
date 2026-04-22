@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     @Override
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.username(), request.password())
@@ -39,9 +41,17 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtUtil.generateToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
-        return new AuthResponse(token, refreshToken, user.getRole(), user.getFullName());
+        return new AuthResponse(
+                token,
+                refreshToken,
+                user.getRole(),
+                user.getFullName(),
+                user.getId(),
+                user.getSchool() != null ? user.getSchool().getId() : null,
+                user.getStudent() != null ? user.getStudent().getId() : null);
     }
 
+    @Transactional
     @Override
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
@@ -53,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public AuthResponse refreshToken(String refreshToken) {
         String username = jwtUtil.extractUsername(refreshToken);
@@ -63,6 +74,13 @@ public class AuthServiceImpl implements AuthService {
         }
         String token = jwtUtil.generateToken(user);
         String newRefreshToken = jwtUtil.generateRefreshToken(user);
-        return new AuthResponse(token, newRefreshToken, user.getRole(), user.getFullName());
+        return new AuthResponse(
+                token,
+                newRefreshToken,
+                user.getRole(),
+                user.getFullName(),
+                user.getId(),
+                user.getSchool() != null ? user.getSchool().getId() : null,
+                user.getStudent() != null ? user.getStudent().getId() : null);
     }
 }

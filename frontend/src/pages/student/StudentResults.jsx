@@ -5,7 +5,7 @@ import { PageHeader, Spinner } from "../../components/common";
 
 export default function StudentResults() {
   const { user } = useAuth();
-  const studentId = user?.student?.id;
+  const studentId = user?.studentId;
   const [terms, setTerms] = useState([]);
   const [selectedTerm, setSelectedTerm] = useState("");
   const [reportCard, setReportCard] = useState(null);

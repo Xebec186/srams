@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { studentsApi, performanceApi, referenceApi } from "../../api";
 import { PageHeader, Spinner } from "../../components/common";
 
 export default function TeacherGrades() {
   const { user } = useAuth();
+  const { success, error: toastError } = useToast();
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -15,7 +17,6 @@ export default function TeacherGrades() {
   const [scores, setScores] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     async function loadRef() {
@@ -52,7 +53,6 @@ export default function TeacherGrades() {
   }, [selectedGrade, user]);
 
   const setScore = (studentId, field, value) => {
-    setSaved(false);
     setScores((s) => ({
       ...s,
       [studentId]: { ...s[studentId], [field]: value },
@@ -61,7 +61,7 @@ export default function TeacherGrades() {
 
   const handleSubmit = async () => {
     if (!selectedSubject || !selectedTerm) {
-      alert("Please select a subject and term before submitting.");
+      toastError("Please select a subject and term before submitting.");
       return;
     }
     setSaving(true);
@@ -88,9 +88,9 @@ export default function TeacherGrades() {
           }),
         );
       await Promise.all(promises);
-      setSaved(true);
+      success("Grades saved successfully.");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to save grades.");
+      toastError(err.response?.data?.message || "Failed to save grades.");
     } finally {
       setSaving(false);
     }
@@ -153,10 +153,6 @@ export default function TeacherGrades() {
           </div>
         </div>
       </div>
-
-      {saved && (
-        <div className="alert alert-success">Grades saved successfully.</div>
-      )}
 
       {selectedGrade &&
         (loading ? (

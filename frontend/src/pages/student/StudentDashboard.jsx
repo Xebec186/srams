@@ -3,14 +3,10 @@ import { useAuth } from "../../context/AuthContext";
 import { attendanceApi, performanceApi, referenceApi } from "../../api";
 import { PageHeader, Spinner, StatCard } from "../../components/common";
 import { formatPercent } from "../../utils";
-import { jwtDecode } from "jwt-decode";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
-  const token = user?.token;
-  // const decodedToken = jwtDecode(token);
-  // const studentId = decodedToken?.studentId;
-  const studentId = "111"; // Using mock student ID for testing
+  const studentId = user?.studentId;
 
   const [summary, setSummary] = useState(null);
   const [results, setResults] = useState([]);
@@ -84,19 +80,19 @@ export default function StudentDashboard() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-4">
         <StatCard
           icon="calendar"
-          value={formatPercent(summary?.attendancePct)}
+          value={formatPercent(summary?.percentPresent)}
           label="Attendance Rate"
           colorClass="teal"
         />
         <StatCard
           icon="check"
-          value={summary?.presentCount ?? "—"}
+          value={summary?.present ?? "—"}
           label="Days Present"
           colorClass="green"
         />
         <StatCard
           icon="x"
-          value={summary?.absentCount ?? "—"}
+          value={summary?.absent ?? "—"}
           label="Days Absent"
           colorClass="red"
         />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { studentsApi, attendanceApi, referenceApi } from "../../api";
 import { PageHeader, Spinner } from "../../components/common";
 
@@ -14,6 +15,7 @@ const STATUS_COLORS = {
 
 export default function TeacherAttendance() {
   const { user } = useAuth();
+  const { success, error: toastError } = useToast();
   const [students, setStudents] = useState([]);
   const [marks, setMarks] = useState({});
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -24,7 +26,6 @@ export default function TeacherAttendance() {
   const [selectedTerm, setSelectedTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     async function loadRef() {
@@ -44,7 +45,6 @@ export default function TeacherAttendance() {
   useEffect(() => {
     if (!selectedGrade || !user?.schoolId) return;
     setLoading(true);
-    setSubmitted(false);
     studentsApi
       .list({ schoolId: user.schoolId, gradeLevelId: selectedGrade, size: 100 })
       .then((r) => {
@@ -84,9 +84,11 @@ export default function TeacherAttendance() {
         absenceReason: marks[s.id]?.reason || null,
       }));
       await attendanceApi.markBulk({ records });
-      setSubmitted(true);
+      success(
+        `Attendance submitted successfully for ${students.length} students.`,
+      );
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to submit attendance.");
+      toastError(err.response?.data?.message || "Failed to submit attendance.");
     } finally {
       setSubmitting(false);
     }
@@ -116,7 +118,6 @@ export default function TeacherAttendance() {
                 max={new Date().toISOString().split("T")[0]}
                 onChange={(e) => {
                   setDate(e.target.value);
-                  setSubmitted(false);
                 }}
               />
             </div>
@@ -163,12 +164,6 @@ export default function TeacherAttendance() {
           </div>
         </div>
       </div>
-
-      {submitted && (
-        <div className="alert alert-success mb-4">
-          Attendance submitted successfully for {students.length} students.
-        </div>
-      )}
 
       {selectedGrade &&
         (loading ? (

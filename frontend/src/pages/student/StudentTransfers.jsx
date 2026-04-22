@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { transfersApi, schoolsApi } from "../../api";
 import {
   PageHeader,
@@ -41,7 +42,8 @@ function TransferTimeline({ status }) {
 
 export default function StudentTransfers() {
   const { user } = useAuth();
-  const studentId = user?.student?.id;
+  const { warning, success, error: toastError } = useToast();
+  const studentId = user?.studentId;
   const [transfers, setTransfers] = useState([]);
   const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,6 @@ export default function StudentTransfers() {
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ toSchoolId: "", reason: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const load = () => {
     if (!studentId) return;
@@ -75,7 +76,6 @@ export default function StudentTransfers() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setSubmitting(true);
     try {
       await transfersApi.initiate({
@@ -85,15 +85,24 @@ export default function StudentTransfers() {
       });
       setShowForm(false);
       setForm({ toSchoolId: "", reason: "" });
+      success("Transfer request submitted successfully.");
       load();
     } catch (err) {
-      setError(
+      toastError(
         err.response?.data?.message || "Failed to submit transfer request.",
       );
     } finally {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (hasActiveTransfer) {
+      warning(
+        "You have an active transfer request in progress. You cannot submit another until it is resolved.",
+      );
+    }
+  }, [hasActiveTransfer, warning]);
 
   return (
     <div>
@@ -111,13 +120,6 @@ export default function StudentTransfers() {
           )
         }
       />
-
-      {hasActiveTransfer && (
-        <div className="alert mb-4 bg-warning-100 text-warning-600">
-          You have an active transfer request in progress. You cannot submit
-          another until it is resolved.
-        </div>
-      )}
 
       {loading ? (
         <Spinner center />
@@ -183,7 +185,6 @@ export default function StudentTransfers() {
           </>
         }
       >
-        {error && <div className="alert alert-danger">{error}</div>}
         <div className="form-group">
           <label className="form-label">Destination School *</label>
           <select

@@ -24,6 +24,15 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
                                  @Param("q") String query,
                                  Pageable pageable);
 
+    @Query("SELECT s FROM Student s WHERE s.school.id = :schoolId AND s.gradeLevel.id = :gradeLevelId AND " +
+            "(LOWER(s.firstName) LIKE LOWER(CONCAT('%',:q,'%')) OR " +
+            "LOWER(s.lastName) LIKE LOWER(CONCAT('%',:q,'%')) OR " +
+            "s.usid LIKE CONCAT('%',:q,'%'))")
+    Page<Student> searchBySchoolAndGrade(@Param("schoolId") Long schoolId,
+                                         @Param("gradeLevelId") Short gradeLevelId,
+                                         @Param("q") String query,
+                                         Pageable pageable);
+
     @Query("SELECT s FROM Student s WHERE " +
             "(LOWER(s.firstName) LIKE LOWER(CONCAT('%',:q,'%')) OR " +
             "LOWER(s.lastName) LIKE LOWER(CONCAT('%',:q,'%')) OR " +

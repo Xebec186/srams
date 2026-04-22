@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { usersApi, schoolsApi } from "../../api";
+import { useToast } from "../../context/ToastContext";
 import {
   PageHeader,
   Spinner,
@@ -21,6 +22,7 @@ const EMPTY = {
 };
 
 export default function AdminUsers() {
+  const { success, error: toastError } = useToast();
   const [users, setUsers] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
@@ -29,7 +31,6 @@ export default function AdminUsers() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     schoolsApi
@@ -57,7 +58,6 @@ export default function AdminUsers() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setSaving(true);
     try {
       await usersApi.create({
@@ -66,9 +66,10 @@ export default function AdminUsers() {
       });
       setShowForm(false);
       setForm(EMPTY);
+      success("User account created successfully.");
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create user.");
+      toastError(err.response?.data?.message || "Failed to create user.");
     } finally {
       setSaving(false);
     }
@@ -169,7 +170,6 @@ export default function AdminUsers() {
           </>
         }
       >
-        {error && <div className="alert alert-danger">{error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="form-group">
             <label className="form-label">First Name *</label>

@@ -34,7 +34,16 @@ export function AdminAttendanceReport() {
     setLoading(true); setSearched(true);
     try {
       const res = await attendanceApi.getSchoolReport(selectedSchool, { from: fromDate, to: toDate });
-      setReport(Array.isArray(res.data) ? res.data : []);
+      setReport(Array.isArray(res.data)
+        ? res.data
+        : res.data
+          ? [{
+              attendanceDate: res.data.to || toDate,
+              present: res.data.present || 0,
+              absent: res.data.absent || 0,
+              totalMarked: res.data.total || 0,
+            }]
+          : []);
     } finally { setLoading(false); }
   };
 

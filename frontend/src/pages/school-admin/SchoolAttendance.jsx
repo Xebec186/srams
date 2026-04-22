@@ -36,7 +36,28 @@ export default function SchoolAttendance() {
         from: fromDate,
         to: toDate,
       });
-      setReport(Array.isArray(res.data) ? res.data : []);
+      if (Array.isArray(res.data)) {
+        setReport(res.data);
+      } else if (res.data) {
+        const summary = res.data;
+        setReport([
+          {
+            attendanceDate: summary.to || toDate,
+            period: "ALL",
+            totalMarked: summary.total || 0,
+            present: summary.present || 0,
+            absent: summary.absent || 0,
+            late: 0,
+            excused: 0,
+            attendanceRate:
+              (summary.total || 0) > 0
+                ? Math.round(((summary.present || 0) / summary.total) * 100)
+                : 0,
+          },
+        ]);
+      } else {
+        setReport([]);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { schoolsApi, referenceApi } from "../../api";
+import { useToast } from "../../context/ToastContext";
 import {
   PageHeader,
   Spinner,
@@ -21,6 +22,7 @@ const EMPTY_SCHOOL = {
 };
 
 export default function AdminSchools() {
+  const { success, error: toastError } = useToast();
   const [schools, setSchools] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
@@ -29,7 +31,6 @@ export default function AdminSchools() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_SCHOOL);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     referenceApi.getRegions().then((r) => setRegions(r.data));
@@ -55,15 +56,15 @@ export default function AdminSchools() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setSaving(true);
     try {
       await schoolsApi.create({ ...form, regionId: Number(form.regionId) });
       setShowForm(false);
       setForm(EMPTY_SCHOOL);
+      success("School created successfully.");
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create school.");
+      toastError(err.response?.data?.message || "Failed to create school.");
     } finally {
       setSaving(false);
     }
@@ -160,7 +161,6 @@ export default function AdminSchools() {
           </>
         }
       >
-        {error && <div className="alert alert-danger">{error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="form-group">
             <label className="form-label">School Name *</label>

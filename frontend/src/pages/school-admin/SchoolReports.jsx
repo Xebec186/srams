@@ -69,7 +69,17 @@ export default function SchoolReports() {
         }),
       ]);
 
-      const attRecords = Array.isArray(attRes.data) ? attRes.data : [];
+      const attRecords = Array.isArray(attRes.data)
+        ? attRes.data
+        : attRes.data
+          ? [
+              {
+                attendanceDate: attRes.data.to || today,
+                present: attRes.data.present || 0,
+                totalMarked: attRes.data.total || 0,
+              },
+            ]
+          : [];
       const perfRecords = Array.isArray(perfRes.data) ? perfRes.data : [];
 
       const attByDate = {};

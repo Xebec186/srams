@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { studentsApi, schoolsApi, referenceApi } from "../../api";
+import { useToast } from "../../context/ToastContext";
 
 const EMPTY = {
   firstName: "",
@@ -23,6 +24,7 @@ export default function StudentForm({
   onCancel,
   schoolId: presetSchoolId,
 }) {
+  const { success, error: toastError } = useToast();
   const [form, setForm] = useState({
     ...EMPTY,
     schoolId: presetSchoolId || "",
@@ -30,7 +32,6 @@ export default function StudentForm({
   const [schools, setSchools] = useState([]);
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     referenceApi.getGradeLevels().then((r) => setGrades(r.data));
@@ -45,7 +46,6 @@ export default function StudentForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
     try {
       await studentsApi.create({
@@ -54,9 +54,10 @@ export default function StudentForm({
         gradeLevelId: Number(form.gradeLevelId),
         enrollmentYear: Number(form.enrollmentYear),
       });
+      success("Student registered successfully.");
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to register student.");
+      toastError(err.response?.data?.message || "Failed to register student.");
     } finally {
       setLoading(false);
     }
@@ -64,8 +65,6 @@ export default function StudentForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && <div className="alert alert-danger">{error}</div>}
-
       <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">
         Personal Information
       </p>

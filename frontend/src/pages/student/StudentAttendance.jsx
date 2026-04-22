@@ -6,7 +6,7 @@ import { formatDate, getAttendanceCellClass, formatPercent } from "../../utils";
 
 export default function StudentAttendance() {
   const { user } = useAuth();
-  const studentId = user?.student?.id;
+  const studentId = user?.studentId;
   const [terms, setTerms] = useState([]);
   const [selectedTerm, setSelectedTerm] = useState("");
   const [records, setRecords] = useState([]);
@@ -65,27 +65,27 @@ export default function StudentAttendance() {
           {[
             {
               label: "Attendance Rate",
-              value: formatPercent(summary.attendancePct),
+              value: formatPercent(summary.percentPresent),
               color: "text-primary-600",
             },
             {
               label: "Present",
-              value: summary.presentCount,
+              value: summary.present,
               color: "text-success-600",
             },
             {
               label: "Absent",
-              value: summary.absentCount,
+              value: summary.absent,
               color: "text-danger-600",
             },
             {
               label: "Late",
-              value: summary.lateCount,
+              value: summary.late,
               color: "text-warning-600",
             },
             {
               label: "Excused",
-              value: summary.excusedCount,
+              value: summary.excused,
               color: "text-info-600",
             },
           ].map(({ label, value, color }) => (

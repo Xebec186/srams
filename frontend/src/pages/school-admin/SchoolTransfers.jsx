@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { transfersApi, schoolsApi } from "../../api";
 import {
   PageHeader,
@@ -41,6 +42,7 @@ function TransferTimeline({ status }) {
 
 export default function SchoolTransfers() {
   const { user } = useAuth();
+  const { success, error: toastError } = useToast();
   const schoolId = user?.schoolId;
 
   const [transfers, setTransfers] = useState([]);
@@ -56,8 +58,9 @@ export default function SchoolTransfers() {
     toSchoolId: "",
     reason: "",
   });
-  const [formError, setFormError] = useState("");
   const [formSaving, setFormSaving] = useState(false);
+  const [showReject, setShowReject] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     schoolsApi
@@ -92,7 +95,12 @@ export default function SchoolTransfers() {
       else if (action === "reject")
         await transfersApi.reject(selected.id, reason);
       setSelected(null);
+      setShowReject(false);
+      setRejectReason("");
+      success("Transfer status updated.");
       load();
+    } catch (err) {
+      toastError(err.response?.data?.message || "Failed to update transfer.");
     } finally {
       setActionLoading(false);
     }
@@ -100,7 +108,6 @@ export default function SchoolTransfers() {
 
   const handleInitiate = async (e) => {
     e.preventDefault();
-    setFormError("");
     setFormSaving(true);
     try {
       await transfersApi.initiate({
@@ -110,11 +117,10 @@ export default function SchoolTransfers() {
       });
       setShowInitiate(false);
       setForm({ studentId: "", toSchoolId: "", reason: "" });
+      success("Transfer request initiated successfully.");
       load();
     } catch (err) {
-      setFormError(
-        err.response?.data?.message || "Failed to initiate transfer.",
-      );
+      toastError(err.response?.data?.message || "Failed to initiate transfer.");
     } finally {
       setFormSaving(false);
     }
@@ -266,7 +272,7 @@ export default function SchoolTransfers() {
             </div>
 
             {selected.rejectionReason && (
-              <div className="alert alert-danger mb-3">
+              <div className="mb-3 text-sm text-danger-600">
                 Rejection reason: {selected.rejectionReason}
               </div>
             )}
@@ -276,10 +282,7 @@ export default function SchoolTransfers() {
                 <>
                   <button
                     className="btn btn-danger"
-                    onClick={() => {
-                      const r = prompt("Rejection reason:");
-                      if (r) doAction("reject", r);
-                    }}
+                    onClick={() => setShowReject(true)}
                     disabled={actionLoading}
                   >
                     Reject
@@ -309,6 +312,40 @@ export default function SchoolTransfers() {
       </Modal>
 
       <Modal
+        isOpen={showReject}
+        onClose={() => setShowReject(false)}
+        title="Reject Transfer Request"
+        footer={
+          <>
+            <button
+              className="btn btn-outline"
+              onClick={() => setShowReject(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-danger"
+              disabled={!rejectReason.trim() || actionLoading}
+              onClick={() => doAction("reject", rejectReason.trim())}
+            >
+              {actionLoading ? "Rejecting..." : "Confirm Reject"}
+            </button>
+          </>
+        }
+      >
+        <div className="form-group">
+          <label className="form-label">Rejection reason *</label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Enter reason for rejection..."
+          />
+        </div>
+      </Modal>
+
+      <Modal
         isOpen={showInitiate}
         onClose={() => setShowInitiate(false)}
         title="Initiate Transfer Request"
@@ -330,7 +367,6 @@ export default function SchoolTransfers() {
           </>
         }
       >
-        {formError && <div className="alert alert-danger">{formError}</div>}
         <div className="form-group">
           <label className="form-label">Student USID or Name *</label>
           <input

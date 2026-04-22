@@ -10,6 +10,7 @@ public interface UserService {
     UserResponse createUser(CreateUserRequest request);
     UserResponse getUserById(Long id);
     Page<UserResponse> getUsersBySchool(Long schoolId, Pageable pageable);
+    Page<UserResponse> getUsers(Pageable pageable, String role);
     UserResponse updateUser(Long id, UpdateUserRequest request);
     void deactivateUser(Long id);
     void activateUser(Long id);
