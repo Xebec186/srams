@@ -1,0 +1,478 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Work+Sans:wght@300;400;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Primary (navy ink) */
+  --color-primary-50: #f6f8ff;
+  --color-primary-100: #eef4ff;
+  --color-primary-200: #d8e6ff;
+  --color-primary-300: #a9c8ff;
+  --color-primary-400: #6b9af6;
+  --color-primary-500: #315fe0;
+  --color-primary-600: #254db2;
+  --color-primary-700: #18367a;
+  --color-primary-800: #0f234d;
+  --color-primary-900: #061224;
+
+  /* Accent (Ghanaian amber/gold) */
+  --color-accent-200: #fff3d6;
+  --color-accent-400: #ffbf4a;
+  --color-accent-500: #ffb300;
+
+  /* Semantic */
+  --color-success-500: #059669;
+  --color-success-600: #059669;
+  --color-success-100: #d1fae5;
+  --color-danger-500: #dc2626;
+  --color-danger-600: #dc2626;
+  --color-danger-100: #fee2e2;
+  --color-warning-500: #d97706;
+  --color-warning-600: #d97706;
+  --color-warning-100: #fff7ed;
+  --color-info-500: #2563eb;
+  --color-info-600: #2563eb;
+  --color-info-100: #eaf2ff;
+
+  /* Neutrals (kept minimal) */
+  --color-neutral-50: #fcfdff;
+  --color-neutral-100: #f8fafc;
+  --color-neutral-200: #eef2f6;
+  --color-neutral-300: #e0e6ec;
+  --color-neutral-400: #9aa6b2;
+  --color-neutral-500: #6b7780;
+  --color-neutral-600: #47515a;
+  --color-neutral-700: #2d3742;
+  --color-neutral-800: #192126;
+  --color-neutral-900: #0b1114;
+
+  /* Typography tokens */
+  --font-display: "Merriweather", serif;
+  --font-body: "Work Sans", sans-serif;
+
+  /* Radii and spacing */
+  --radius-card: 12px;
+  --radius-badge: 20px;
+  --spacing-sidebar: 260px;
+  --header-height: 64px;
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-neutral-50);
+    color: var(--color-neutral-900);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-neutral-900);
+    margin: 0;
+  }
+
+  ::selection {
+    background: var(--color-primary-200);
+    color: var(--color-primary-900);
+  }
+
+  /* Focus ring for keyboard users */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--color-primary-100);
+    border-radius: 6px;
+  }
+
+  /* Small helpers */
+  .sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@layer components {
+  /* Layout shell */
+  .app-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+  .app-sidebar {
+    width: var(--spacing-sidebar);
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    background: linear-gradient(
+      180deg,
+      var(--color-primary-900),
+      var(--color-primary-800)
+    );
+    color: #fff;
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .app-main {
+    margin-left: var(--spacing-sidebar);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-header {
+    height: var(--header-height);
+    @apply flex items-center justify-between px-6 bg-white border-b border-neutral-200;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .app-content {
+    @apply flex-1 p-8 max-w-[1200px] w-full mx-auto;
+  }
+
+  /* Sidebar */
+  .sidebar-brand {
+    @apply mb-2 px-2;
+  }
+  .sidebar-brand .brand-title {
+    @apply text-sm font-semibold tracking-widest text-white;
+  }
+  .sidebar-brand .brand-sub {
+    @apply text-xs text-primary-200;
+  }
+
+  .sidebar-section {
+    @apply mt-4;
+  }
+  .sidebar-section .sidebar-section-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-primary-300 px-2 mb-2;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm text-primary-100 transition-colors;
+  }
+  .sidebar-link:hover {
+    @apply bg-white/5 text-white;
+  }
+  .sidebar-link-active {
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-600),
+      var(--color-primary-500)
+    );
+    @apply text-white font-semibold;
+  }
+
+  .sidebar-avatar {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary-500 text-white font-semibold;
+  }
+  .sidebar-user {
+    @apply mt-auto px-2 py-3 bg-white/5 rounded-md;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-display font-bold text-neutral-900;
+  }
+  .page-subtitle {
+    @apply text-sm text-neutral-500 mt-1;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white border border-neutral-200 rounded-[var(--radius-card)] shadow-sm overflow-hidden;
+  }
+  .card-header {
+    @apply px-5 py-4 border-b border-neutral-100 flex items-center justify-between;
+  }
+  .card-body {
+    @apply p-5;
+  }
+  .card-footer {
+    @apply px-5 py-3 border-t border-neutral-100 bg-neutral-50;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus:outline-none;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus:outline-none px-4 py-2 bg-primary-600 text-white hover:bg-primary-500;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus:outline-none px-3 py-2 bg-neutral-100 text-neutral-800 hover:bg-neutral-200;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus:outline-none px-3 py-2 bg-transparent border border-neutral-200 text-neutral-800 hover:bg-neutral-50;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus:outline-none px-3 py-2 bg-danger-500 text-white hover:bg-danger-600;
+  }
+  .btn-sm {
+    @apply text-sm px-3 py-1.5;
+  }
+  .btn-lg {
+    @apply text-base px-5 py-3;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-white border border-neutral-200 rounded-[var(--radius-card)] shadow-sm overflow-hidden flex items-center gap-4 p-4;
+  }
+  .stat-card .stat-icon {
+    @apply w-11 h-11 rounded-lg flex items-center justify-center text-lg;
+  }
+  .stat-value {
+    @apply text-2xl font-bold text-neutral-900;
+  }
+  .stat-label {
+    @apply text-sm text-neutral-500;
+  }
+
+  /* Form */
+  .form-control {
+    @apply w-full px-3 py-2 border border-neutral-300 rounded-md text-sm text-neutral-900 bg-white focus:outline-none focus:ring-2 focus:ring-primary-400;
+  }
+  .form-label {
+    @apply block text-sm font-semibold text-neutral-700 mb-2;
+  }
+  .form-error {
+    @apply text-sm text-danger-500 mt-1;
+  }
+
+  /* Search */
+  .search-box {
+    @apply relative w-full max-w-[420px];
+  }
+  .search-box .search-input {
+    @apply w-full px-3 py-2 border border-neutral-300 rounded-md text-sm text-neutral-900 bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 pl-10;
+  }
+  .search-box .search-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400;
+  }
+
+  /* Table */
+  .table-wrapper {
+    @apply overflow-x-auto rounded-md;
+  }
+  table {
+    @apply w-full border-collapse text-sm;
+  }
+  thead th {
+    @apply text-xs font-semibold text-neutral-500 bg-neutral-50 uppercase tracking-wide px-4 py-2 text-left;
+  }
+  tbody td {
+    @apply px-4 py-3 border-t border-neutral-100 text-neutral-700;
+  }
+  tbody tr:hover td {
+    background: theme(colors.white, #fff);
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge.success {
+    background: var(--color-success-100);
+    color: var(--color-success-500);
+  }
+  .badge.danger {
+    background: var(--color-danger-100);
+    color: var(--color-danger-500);
+  }
+  .badge.warning {
+    background: var(--color-warning-100);
+    color: var(--color-warning-500);
+  }
+  .badge.info {
+    background: var(--color-info-100);
+    color: var(--color-info-500);
+  }
+  .badge.neutral {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-700);
+  }
+  .badge.primary {
+    background: var(--color-primary-100);
+    color: var(--color-primary-700);
+  }
+
+  /* USID tag */
+  .usid-tag {
+    @apply font-mono text-sm px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-primary-700;
+  }
+
+  /* Grade pills */
+  .grade-pill {
+    @apply font-mono text-sm font-bold px-3 py-1 rounded-md inline-block;
+  }
+  .grade-A1 {
+    background: var(--color-success-100);
+    color: var(--color-success-500);
+  }
+  .grade-B2 {
+    background: var(--color-info-100);
+    color: var(--color-info-500);
+  }
+  .grade-C3 {
+    background: var(--color-accent-200);
+    color: var(--color-accent-500);
+  }
+  .grade-D4 {
+    background: var(--color-warning-100);
+    color: var(--color-warning-500);
+  }
+  .grade-E8 {
+    background: var(--color-danger-100);
+    color: var(--color-danger-500);
+  }
+  .grade-F9 {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-700);
+  }
+
+  /* Attendance cells */
+  .att-cell {
+    @apply inline-flex items-center justify-center rounded-md text-xs font-semibold px-2 py-1;
+  }
+  .att-present {
+    background: var(--color-success-100);
+    color: var(--color-success-500);
+  }
+  .att-absent {
+    background: var(--color-danger-100);
+    color: var(--color-danger-500);
+  }
+  .att-late {
+    background: var(--color-warning-100);
+    color: var(--color-warning-500);
+  }
+  .att-excused {
+    background: var(--color-info-100);
+    color: var(--color-info-500);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+  }
+  .modal {
+    @apply bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden;
+  }
+  .modal-header {
+    @apply px-6 py-4 border-b border-neutral-100 flex items-center justify-between;
+  }
+  .modal-body {
+    @apply p-6;
+  }
+  .modal-footer {
+    @apply px-6 py-4 border-t border-neutral-100 flex items-center justify-end gap-3;
+  }
+
+  /* Timeline */
+  .transfer-timeline {
+    @apply flex items-center gap-4;
+  }
+  .timeline-step {
+    @apply flex-1 flex flex-col items-center text-center;
+  }
+  .timeline-dot {
+    @apply w-9 h-9 rounded-full flex items-center justify-center text-sm bg-neutral-100 border border-neutral-200;
+  }
+  .timeline-dot.active {
+    @apply bg-primary-600 text-white border-primary-600;
+  }
+  .timeline-dot.done {
+    @apply bg-success-500 text-white border-success-500;
+  }
+
+  /* Spinner */
+  .spinner {
+    @apply w-7 h-7 border-4 rounded-full border-neutral-200 border-t-primary-500 animate-spin;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply text-center py-12 px-6 text-neutral-500;
+  }
+
+  /* Page utilities */
+  .page-actions {
+    @apply flex items-center gap-3;
+  }
+
+  /* Report-card print-friendly */
+  .report-card {
+    @apply bg-white rounded-md border border-neutral-100 shadow-md p-6;
+  }
+  @media print {
+    .report-card {
+      box-shadow: none;
+      border: 1px solid #000;
+    }
+    .app-sidebar,
+    .app-header,
+    .page-actions {
+      display: none !important;
+    }
+    .app-main {
+      margin-left: 0 !important;
+    }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Small compatibility helpers (used by legacy components until JSX updated) */
+.btn-primary {
+  background: var(--color-primary-600);
+  color: white;
+}
+.btn-accent {
+  background: var(--color-accent-400);
+  color: white;
+}
+.badge {
+  border-radius: var(--radius-badge);
+}

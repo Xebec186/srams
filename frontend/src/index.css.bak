@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ============================================================
+   SRAMS Design System — CSS Variables
+   ============================================================ */
+:root {
+  /* Primary: Deep Teal */
+  --color-primary-900: #0a2e2e;
+  --color-primary-800: #0d3b3b;
+  --color-primary-700: #114848;
+  --color-primary-600: #155555;
+  --color-primary-500: #1a6b6b;
+  --color-primary-400: #217d7d;
+  --color-primary-300: #3a9e9e;
+  --color-primary-200: #7dcfcf;
+  --color-primary-100: #c2ecec;
+  --color-primary-50:  #edfafa;
+
+  /* Accent: Warm Amber */
+  --color-accent-700: #92400e;
+  --color-accent-600: #b45309;
+  --color-accent-500: #d97706;
+  --color-accent-400: #f59e0b;
+  --color-accent-300: #fbbf24;
+  --color-accent-100: #fef3c7;
+
+  /* Neutrals */
+  --color-neutral-900: #111827;
+  --color-neutral-800: #1f2937;
+  --color-neutral-700: #374151;
+  --color-neutral-600: #4b5563;
+  --color-neutral-500: #6b7280;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-50:  #f9fafb;
+
+  /* Semantic */
+  --color-success-600: #059669;
+  --color-success-100: #d1fae5;
+  --color-danger-600:  #dc2626;
+  --color-danger-100:  #fee2e2;
+  --color-warning-600: #d97706;
+  --color-warning-100: #fef3c7;
+  --color-info-600:    #2563eb;
+  --color-info-100:    #dbeafe;
+
+  /* Layout */
+  --sidebar-width: 256px;
+  --header-height: 64px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+  line-height: 1.5;
+}
+
+/* ... rest of previous CSS ... */
