@@ -1,4 +1,3 @@
-// src/api/client.js
 import axios from "axios";
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 const client = axios.create({
@@ -157,6 +156,7 @@ export const attendanceApi = realAttendanceApi;
 // ============================================================
 const realPerformanceApi = {
   recordScore: (data) => client.post("/performance", data),
+  recordScoresBulk: (data) => client.post("/performance/bulk", data),
   getStudentResults: (studentId, termId) =>
     client.get(`/performance/student/${studentId}/term/${termId}`),
   getReportCard: (studentId, termId) =>
@@ -190,6 +190,11 @@ const realSchoolsApi = {
   create: (data) => client.post("/schools", data),
   update: (id, data) => client.put(`/schools/${id}`, data),
   getByRegion: (regionId) => client.get(`/schools/region/${regionId}`),
+  getStats: (schoolId, date) => {
+    const params = {};
+    if (date) params.date = date;
+    return client.get(`/schools/${schoolId}/stats`, { params });
+  },
 };
 export const schoolsApi = realSchoolsApi;
 
@@ -217,4 +222,3 @@ const realReferenceApi = {
   getTerms: (yearId) => client.get(`/academic-years/${yearId}/terms`),
 };
 export const referenceApi = realReferenceApi;
-

@@ -1,5 +1,6 @@
 package com.srams.service.impl;
 
+import com.srams.dto.request.BulkRecordScoreRequest;
 import com.srams.dto.request.RecordScoreRequest;
 import com.srams.dto.response.PerformanceResponse;
 import com.srams.dto.response.ReportCardResponse;
@@ -69,12 +70,77 @@ public class AcademicPerformanceServiceImpl implements AcademicPerformanceServic
         performance.setSubject(subject);
         performance.setClassScore(request.classScore());
         performance.setExamScore(request.examScore());
+        
+        // Calculate total and grade
+        BigDecimal total = BigDecimal.ZERO;
+        if (request.classScore() != null) total = total.add(request.classScore());
+        if (request.examScore() != null) total = total.add(request.examScore());
+        performance.setTotalScore(total);
+        performance.setGrade(computeGrade(total.doubleValue()));
+        
         performance.setRemarks(request.remarks());
         performance.setRecordedBy(recorder);
 
         AcademicPerformance saved = performanceRepository.save(performance);
 
         return PerformanceResponse.from(saved);
+    }
+
+    @Transactional
+    @Override
+    public void recordScoresBulk(BulkRecordScoreRequest request, Long recordedByUserId) {
+        Term term = termRepository.findById(request.termId())
+                .orElseThrow(() -> new ResourceNotFoundException("Term not found with ID: " + request.termId()));
+
+        Subject subject = subjectRepository.findById(request.subjectId().intValue())
+                .orElseThrow(() -> new ResourceNotFoundException("Subject not found with ID: " + request.subjectId()));
+
+        GradeLevel gradeLevel = gradeLevelRepository.findById(request.gradeLevelId().shortValue())
+                .orElseThrow(() -> new ResourceNotFoundException("Grade level not found with ID: " + request.gradeLevelId()));
+
+        User recorder = userRepository.findById(recordedByUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + recordedByUserId));
+
+        for (BulkRecordScoreRequest.StudentScoreRequest scoreRequest : request.scores()) {
+            Student student = studentRepository.findById(scoreRequest.studentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + scoreRequest.studentId()));
+
+            AcademicPerformance performance = performanceRepository
+                    .findByStudentIdAndTermIdAndSubjectId(student.getId(), term.getId().longValue(), subject.getId())
+                    .orElse(new AcademicPerformance());
+
+            performance.setStudent(student);
+            performance.setSchool(student.getSchool());
+            performance.setTerm(term);
+            performance.setGradeLevel(gradeLevel);
+            performance.setSubject(subject);
+            performance.setClassScore(scoreRequest.classScore());
+            performance.setExamScore(scoreRequest.examScore());
+            
+            // Calculate total and grade
+            BigDecimal total = BigDecimal.ZERO;
+            if (scoreRequest.classScore() != null) total = total.add(scoreRequest.classScore());
+            if (scoreRequest.examScore() != null) total = total.add(scoreRequest.examScore());
+            performance.setTotalScore(total);
+            performance.setGrade(computeGrade(total.doubleValue()));
+            
+            performance.setRemarks(scoreRequest.remarks());
+            performance.setRecordedBy(recorder);
+
+            performanceRepository.save(performance);
+        }
+    }
+
+    private String computeGrade(double total) {
+        if (total >= 80) return "A1";
+        if (total >= 70) return "B2";
+        if (total >= 60) return "B3";
+        if (total >= 55) return "C4";
+        if (total >= 50) return "C5";
+        if (total >= 45) return "C6";
+        if (total >= 40) return "D7";
+        if (total >= 35) return "E8";
+        return "F9";
     }
 
     @Transactional(readOnly = true)

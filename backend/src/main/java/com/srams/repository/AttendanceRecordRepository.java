@@ -13,10 +13,19 @@ import java.util.List;
 public interface AttendanceRecordRepository extends JpaRepository<AttendanceRecord, BigInteger> {
     boolean existsByStudentIdAndAttendanceDateAndPeriod(Long studentId, LocalDate date, Period period);
 
+    @Query("SELECT ar FROM AttendanceRecord ar " +
+            "JOIN FETCH ar.student " +
+            "JOIN FETCH ar.term " +
+            "JOIN FETCH ar.gradeLevel " +
+            "WHERE ar.school.id = :schoolId AND ar.attendanceDate = :date AND ar.gradeLevel.id = :gradeLevelId")
     List<AttendanceRecord> findBySchoolIdAndAttendanceDateAndGradeLevelId(
-            Long schoolId, LocalDate date, Short gradeLevelId);
+            @Param("schoolId") Long schoolId, @Param("date") LocalDate date, @Param("gradeLevelId") Short gradeLevelId);
 
-    @Query("SELECT ar FROM AttendanceRecord ar WHERE ar.student.id = :studentId " +
+    @Query("SELECT ar FROM AttendanceRecord ar " +
+            "JOIN FETCH ar.student " +
+            "JOIN FETCH ar.term " +
+            "JOIN FETCH ar.gradeLevel " +
+            "WHERE ar.student.id = :studentId " +
             "AND ar.term.id = :termId ORDER BY ar.attendanceDate, ar.period")
     List<AttendanceRecord> findByStudentAndTerm(@Param("studentId") Long studentId,
                                                 @Param("termId") Long termId);
@@ -26,5 +35,11 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     List<Object[]> getAttendanceSummary(@Param("studentId") Long studentId,
                                         @Param("termId") Long termId);
 
-    List<AttendanceRecord> findBySchoolIdAndAttendanceDateBetween(Long schoolId, LocalDate from, LocalDate to);
+    @Query("SELECT ar FROM AttendanceRecord ar " +
+            "JOIN FETCH ar.student " +
+            "JOIN FETCH ar.term " +
+            "JOIN FETCH ar.gradeLevel " +
+            "WHERE ar.school.id = :schoolId AND ar.attendanceDate BETWEEN :from AND :to")
+    List<AttendanceRecord> findBySchoolIdAndAttendanceDateBetween(
+            @Param("schoolId") Long schoolId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 }

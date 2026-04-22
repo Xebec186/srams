@@ -341,14 +341,26 @@
     color: var(--color-success-500);
   }
   .grade-B2 {
+    background: var(--color-success-100);
+    color: var(--color-success-600);
+  }
+  .grade-B3 {
     background: var(--color-info-100);
     color: var(--color-info-500);
   }
-  .grade-C3 {
+  .grade-C4 {
     background: var(--color-accent-200);
     color: var(--color-accent-500);
   }
-  .grade-D4 {
+  .grade-C5 {
+    background: var(--color-accent-200);
+    color: var(--color-accent-500);
+  }
+  .grade-C6 {
+    background: var(--color-accent-200);
+    color: var(--color-accent-500);
+  }
+  .grade-D7 {
     background: var(--color-warning-100);
     color: var(--color-warning-500);
   }
@@ -386,17 +398,22 @@
   .modal-overlay {
     @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
   }
+
   .modal {
-    @apply bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden;
+    @apply bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden max-h-[90vh] flex flex-col;
   }
+
   .modal-header {
-    @apply px-6 py-4 border-b border-neutral-100 flex items-center justify-between;
+    @apply px-6 py-4 border-b border-neutral-100 flex items-center justify-between shrink-0;
   }
+
   .modal-body {
-    @apply p-6;
+    /* Added: overflow-y-auto */
+    @apply p-6 overflow-y-auto;
   }
+
   .modal-footer {
-    @apply px-6 py-4 border-t border-neutral-100 flex items-center justify-end gap-3;
+    @apply px-6 py-4 border-t border-neutral-100 flex items-center justify-end gap-3 shrink-0;
   }
 
   /* Timeline */

@@ -93,12 +93,40 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Transactional(readOnly = true)
     @Override
-    public SchoolAttendanceReportResponse getSchoolAttendanceReport(Long schoolId, LocalDate from, LocalDate to) {
-        List<AttendanceRecord> records = attendanceRepository.findBySchoolIdAndAttendanceDateBetween(schoolId, from, to);
-        long present = records.stream().filter(r -> r.getStatus() == com.srams.enums.AttendanceStatus.PRESENT).count();
-        long absent = records.stream().filter(r -> r.getStatus() == com.srams.enums.AttendanceStatus.ABSENT).count();
-        long total = records.size();
-        return new SchoolAttendanceReportResponse(schoolId, from, to, present, absent, total);
+    public SchoolAttendanceReportResponse getSchoolAttendanceReport(
+            Long schoolId, LocalDate from, LocalDate to) {
+
+        List<AttendanceRecord> records =
+                attendanceRepository.findBySchoolIdAndAttendanceDateBetween(schoolId, from, to);
+
+        long present = 0, absent = 0, late = 0, excused = 0;
+
+        for (AttendanceRecord r : records) {
+            switch (r.getStatus()) {
+                case PRESENT -> present++;
+                case ABSENT -> absent++;
+                case LATE -> late++;
+                case EXCUSED -> excused++;
+            }
+        }
+
+        long total = present + absent + late + excused;
+
+        double attendanceRate = total > 0
+                ? Math.round(((present + late) * 10000.0 / total)) / 100.0
+                : 0.0;
+
+        return new SchoolAttendanceReportResponse(
+                schoolId,
+                from,
+                to,
+                present,
+                absent,
+                late,
+                excused,
+                total,
+                attendanceRate
+        );
     }
 
     @Transactional(readOnly = true)

@@ -48,7 +48,7 @@ export default function StudentResults() {
         >
           {terms.map((t) => (
             <option key={t.id} value={t.id}>
-              Term {t.termNumber} — {t.academicYear?.label}
+              Term {t?.termNumber} — {t?.academicYearLabel}
             </option>
           ))}
         </select>

@@ -1,5 +1,6 @@
 package com.srams.controller;
 
+import com.srams.dto.request.BulkRecordScoreRequest;
 import com.srams.dto.request.RecordScoreRequest;
 import com.srams.dto.response.PerformanceResponse;
 import com.srams.dto.response.ReportCardResponse;
@@ -26,6 +27,14 @@ public class AcademicPerformanceController {
                                                       @AuthenticationPrincipal User user) {
         return ResponseEntity.status(201)
                 .body(performanceService.recordScore(request, user.getId()));
+    }
+
+    @PostMapping("/bulk")
+    @PreAuthorize("hasAnyRole('TEACHER','SCHOOL_ADMIN')")
+    public ResponseEntity<Void> recordBulk(@RequestBody @Valid BulkRecordScoreRequest request,
+                                           @AuthenticationPrincipal User user) {
+        performanceService.recordScoresBulk(request, user.getId());
+        return ResponseEntity.status(201).build();
     }
 
     @GetMapping("/student/{studentId}/term/{termId}")

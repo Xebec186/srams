@@ -23,7 +23,6 @@ public class SchoolController {
     private final SchoolService schoolService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN')")
     public ResponseEntity<Page<SchoolResponse>> list(Pageable pageable) {
         return ResponseEntity.ok(schoolService.getAllSchools(pageable));
     }

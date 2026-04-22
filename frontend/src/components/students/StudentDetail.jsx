@@ -166,7 +166,7 @@ export default function StudentDetail({ studentId }) {
             >
               {terms.map((t) => (
                 <option key={t.id} value={t.id}>
-                  Term {t.termNumber} — {t.academicYear?.label}
+                  Term {t.termNumber} — {t.academicYearLabel}
                 </option>
               ))}
             </select>
@@ -190,7 +190,7 @@ export default function StudentDetail({ studentId }) {
             title="School Details"
             rows={[
               ["School", student.schoolName],
-              ["Grade", student.gradeName],
+              ["Grade", student.gradeCode],
               ["Enrolment Date", formatDate(student.enrollmentDate)],
               ["Enrolment Year", student.enrollmentYear],
             ]}
@@ -218,7 +218,7 @@ export default function StudentDetail({ studentId }) {
                   className="stat-value"
                   style={{ color: "var(--color-success-500)" }}
                 >
-                  {attendance.presentCount}
+                  {attendance.present}
                 </div>
                 <div className="stat-label">Present</div>
               </div>
@@ -227,7 +227,7 @@ export default function StudentDetail({ studentId }) {
                   className="stat-value"
                   style={{ color: "var(--color-danger-500)" }}
                 >
-                  {attendance.absentCount}
+                  {attendance.absent}
                 </div>
                 <div className="stat-label">Absent</div>
               </div>
@@ -236,7 +236,7 @@ export default function StudentDetail({ studentId }) {
                   className="stat-value"
                   style={{ color: "var(--color-warning-500)" }}
                 >
-                  {attendance.lateCount}
+                  {attendance.late}
                 </div>
                 <div className="stat-label">Late</div>
               </div>
@@ -245,7 +245,7 @@ export default function StudentDetail({ studentId }) {
                   className="stat-value"
                   style={{ color: "var(--color-info-500)" }}
                 >
-                  {attendance.excusedCount}
+                  {attendance.excused}
                 </div>
                 <div className="stat-label">Excused</div>
               </div>
@@ -259,11 +259,11 @@ export default function StudentDetail({ studentId }) {
                       Attendance Rate
                     </div>
                     <div className="text-3xl font-bold text-primary-600">
-                      {formatPercent(attendance.attendancePct)}
+                      {formatPercent(attendance.percentPresent)}
                     </div>
                   </div>
                   <div className="text-sm text-neutral-400">
-                    {attendance.totalSessions} total sessions
+                    {attendance.total} total sessions
                   </div>
                 </div>
               </div>

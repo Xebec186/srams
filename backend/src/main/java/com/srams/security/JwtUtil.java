@@ -28,12 +28,19 @@ public class JwtUtil {
     private long refreshExpirationMs;
 
     public String generateToken(User user) {
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(user.getUsername())
                 .claim("role", user.getRole().name())
-                .claim("userId", user.getId())
-                .claim("studentId", user.getStudent().getId())
-                .issuedAt(new Date())
+                .claim("userId", user.getId());
+
+        if (user.getSchool() != null) {
+            builder.claim("schoolId", user.getSchool().getId());
+        }
+        if (user.getStudent() != null) {
+            builder.claim("studentId", user.getStudent().getId());
+        }
+
+        return builder.issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())
                 .compact();

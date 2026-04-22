@@ -25,7 +25,8 @@ export default function StudentProfile() {
     studentsApi
       .getById(studentId)
       .catch((err) => {
-        const message = err.response?.data?.message || "Failed to load profile.";
+        const message =
+          err.response?.data?.message || "Failed to load profile.";
         setError(message);
         toastError(message);
       })
@@ -73,7 +74,7 @@ export default function StudentProfile() {
           title="School Details"
           rows={[
             ["School", student.schoolName],
-            ["Grade", student.gradeName],
+            ["Grade", student.gradeCode],
             ["Enrolment Date", formatDate(student.enrollmentDate)],
             ["Status", student.status],
           ]}

@@ -8,4 +8,8 @@ public record SchoolAttendanceReportResponse(
         LocalDate to,
         long present,
         long absent,
-        long total) { }
+        long late,
+        long excused,
+        long total,
+        double attendanceRate
+) {}

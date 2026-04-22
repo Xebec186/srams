@@ -216,19 +216,19 @@ def generate_usid(region_code: str, school_code: str, enroll_year: int, sequence
 def calc_grade(total: float) -> str:
     if total >= 80:
         return "A1"
-    if total >= 75:
-        return "B2"
     if total >= 70:
-        return "B3"
-    if total >= 65:
-        return "C4"
+        return "B2"
     if total >= 60:
-        return "C5"
+        return "B3"
     if total >= 55:
-        return "C6"
+        return "C4"
     if total >= 50:
-        return "D7"
+        return "C5"
+    if total >= 45:
+        return "C6"
     if total >= 40:
+        return "D7"
+    if total >= 35:
         return "E8"
     return "F9"
 

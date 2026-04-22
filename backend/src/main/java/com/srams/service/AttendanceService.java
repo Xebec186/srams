@@ -21,4 +21,5 @@ public interface AttendanceService {
     AttendanceSummaryResponse getStudentAttendanceSummary(Long studentId, Long termId);
 
     SchoolAttendanceReportResponse getSchoolAttendanceReport(Long schoolId, LocalDate from, LocalDate to);
+
 }
