@@ -2,7 +2,6 @@ package com.srams.service;
 
 import com.srams.dto.request.AssignTeacherToClassRequest;
 import com.srams.dto.response.TeacherClassAssignmentResponse;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

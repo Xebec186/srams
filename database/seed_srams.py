@@ -732,25 +732,41 @@ def main():
         print("Assigning teachers to classes...")
         tca_rows = 0
         assignment_lookup = defaultdict(list)  # (school_id, grade_level_id, term_id) -> teacher_ids
+        seen_assignments = set()
+
         for school in schools:
             school_teachers = teachers_by_school[school.id]
             if not school_teachers:
                 continue
+
             allowed_grade_codes = AVAILABLE_GRADE_CODES[school.school_type]
+
             for ys in year_starts:
                 for term_number in (1, 2, 3):
                     term_id = term_id_by_key[(ys, term_number)]
+
                     for idx, grade_code in enumerate(allowed_grade_codes):
                         teacher = school_teachers[(idx + term_number) % len(school_teachers)]
                         grade_id = grade_map[grade_code]
+
+                        # Always derive school_id from the teacher record
+                        teacher_school_id = teacher.school_id
+
+                        key = (teacher.id, teacher_school_id, grade_id, term_id)
+                        if key in seen_assignments:
+                            continue
+                        seen_assignments.add(key)
+
                         cur.execute(
                             """INSERT INTO teacher_class_assignments
                                    (teacher_id, school_id, grade_level_id, term_id, is_active)
                                VALUES (%s, %s, %s, %s, 1)""",
-                            (teacher.id, school.id, grade_id, term_id),
+                            (teacher.id, teacher_school_id, grade_id, term_id),
                         )
-                        assignment_lookup[(school.id, grade_id, term_id)].append(teacher.id)
+
+                        assignment_lookup[(teacher_school_id, grade_id, term_id)].append(teacher.id)
                         tca_rows += 1
+
         counts["teacher_class_assignments"] = tca_rows
 
         # 10) ATTENDANCE RECORDS ----------------------------------------------

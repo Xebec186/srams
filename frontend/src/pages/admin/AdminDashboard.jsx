@@ -87,18 +87,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [schools, students, transfers] = await Promise.all([
-          schoolsApi.list({ size: 1 }),
-          studentsApi.list({ size: 1 }),
-          transfersApi.getBySchool(null, {}),
-        ]);
+        const res = await schoolsApi.getSystemStats();
+        const s = res.data;
         setStats({
-          schools: schools.data.totalElements ?? 0,
-          students: students.data.totalElements ?? 0,
-          transfers: Array.isArray(transfers.data) ? transfers.data.length : 0,
+          schools: s.totalSchools,
+          students: s.totalStudents,
+          transfers: s.totalTransfers,
+          attendanceRate: s.averageAttendanceRate > 0 ? `${s.averageAttendanceRate}%` : "—"
         });
       } catch {
-        setStats({ schools: 0, students: 0, transfers: 0 });
+        setStats({ schools: 0, students: 0, transfers: 0, attendanceRate: "—" });
       } finally {
         setLoading(false);
       }
@@ -152,7 +150,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           icon={<IconCalendar />}
-          value="93.4%"
+          value={stats.attendanceRate}
           label="System Attendance Rate"
           colorClass="green"
         />

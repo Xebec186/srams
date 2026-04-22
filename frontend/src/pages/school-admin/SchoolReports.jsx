@@ -17,6 +17,8 @@ import {
   Radar,
   Legend,
 } from "recharts";
+import { FiCalendar, FiBarChart } from "react-icons/fi";
+import { LuNotebookText } from "react-icons/lu";
 
 export default function SchoolReports() {
   const { user } = useAuth();
@@ -157,7 +159,7 @@ export default function SchoolReports() {
               >
                 {terms.map((t) => (
                   <option key={t.id} value={t.id}>
-                    Term {t.termNumber} — {t.academicYear?.label}
+                    Term {t.termNumber} — {t.academicYearLabel}
                   </option>
                 ))}
               </select>
@@ -180,12 +182,12 @@ export default function SchoolReports() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="stat-card">
-                <div className="stat-icon teal">calendar</div>
+                <div className="stat-icon">
+                  <FiCalendar size={28} />
+                </div>
                 <div>
                   <div className="stat-value">
-                    {reportData.overallAttRate
-                      ? `${reportData.overallAttRate}%`
-                      : "—"}
+                    {formatPercent(reportData.overallAttRate)}
                   </div>
                   <div className="stat-label">
                     Avg Attendance Rate (30 days)
@@ -193,7 +195,9 @@ export default function SchoolReports() {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon blue">chart</div>
+                <div className="stat-icon blue">
+                  <FiBarChart size={28} />
+                </div>
                 <div>
                   <div className="stat-value">
                     {reportData.overallPerfAvg
@@ -204,7 +208,9 @@ export default function SchoolReports() {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon green">notes</div>
+                <div className="stat-icon green">
+                  <LuNotebookText size={28} />
+                </div>
                 <div>
                   <div className="stat-value">{reportData.perfCount}</div>
                   <div className="stat-label">Grade Records This Term</div>

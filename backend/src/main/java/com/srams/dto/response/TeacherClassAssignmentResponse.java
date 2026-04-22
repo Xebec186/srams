@@ -9,7 +9,7 @@ public record TeacherClassAssignmentResponse(
         Long schoolId,
         Short gradeLevelId,
         String gradeLevelCode,
-        Integer termId,
+        Byte termNumber,
         boolean active,
         LocalDateTime createdAt
 ) { }

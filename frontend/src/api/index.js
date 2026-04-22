@@ -175,8 +175,11 @@ const realTransfersApi = {
   complete: (id) => client.put(`/transfers/${id}/complete`),
   reject: (id, reason) => client.put(`/transfers/${id}/reject`, { reason }),
   getByStudent: (studentId) => client.get(`/transfers/student/${studentId}`),
-  getBySchool: (schoolId, params) =>
-    client.get(`/transfers/school/${schoolId}`, { params }),
+  listAll: (params) => client.get("/transfers", { params }),
+  getBySchool: (schoolId, params) => {
+    if (!schoolId) return client.get("/transfers", { params });
+    return client.get(`/transfers/school/${schoolId}`, { params });
+  },
   getById: (id) => client.get(`/transfers/${id}`),
 };
 export const transfersApi = realTransfersApi;
@@ -194,6 +197,11 @@ const realSchoolsApi = {
     const params = {};
     if (date) params.date = date;
     return client.get(`/schools/${schoolId}/stats`, { params });
+  },
+  getSystemStats: (date) => {
+    const params = {};
+    if (date) params.date = date;
+    return client.get("/schools/system-stats", { params });
   },
 };
 export const schoolsApi = realSchoolsApi;
@@ -227,6 +235,8 @@ export const referenceApi = realReferenceApi;
 const realTeacherAssignmentsApi = {
   assign: (data) => client.post("/teacher-assignments", data),
   list: (params) => client.get("/teacher-assignments", { params }),
+  getByTeacher: (teacherId) =>
+    client.get(`/teacher-assignments/teacher/${teacherId}`),
   deactivate: (id) => client.delete(`/teacher-assignments/${id}`),
 };
 

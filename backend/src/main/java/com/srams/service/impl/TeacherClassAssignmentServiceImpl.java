@@ -31,15 +31,33 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
         User actor = userRepository.findByUsername(actorUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        if (actor.getRole() == Role.SCHOOL_ADMIN && actor.getSchool() == null) {
+            throw new ConflictException("Your account is not linked to any school");
+        }
+
         School scopeSchool = actor.getRole() == Role.ADMIN
                 ? null
                 : actor.getSchool();
 
         Teacher teacher = teacherRepository.findById(request.teacherId())
-                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+                .orElseGet(() -> teacherRepository.findByUser_Id(request.teacherId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID or User ID: " + request.teacherId())));
 
-        if (scopeSchool != null && !teacher.getSchool().getId().equals(scopeSchool.getId())) {
-            throw new ConflictException("Teacher does not belong to your school");
+        if (scopeSchool != null) {
+            Long teacherSchoolId = teacher.getSchool().getId();
+            Long actorSchoolId = scopeSchool.getId();
+            Long userSchoolId = teacher.getUser().getSchool() != null ? teacher.getUser().getSchool().getId() : null;
+            
+            if (!teacherSchoolId.equals(actorSchoolId)) {
+                // Check if user school matches actor school even if teacher profile school doesn't
+                if (userSchoolId != null && userSchoolId.equals(actorSchoolId)) {
+                   teacher.setSchool(scopeSchool);
+                   teacherRepository.save(teacher);
+                   teacherSchoolId = actorSchoolId;
+                } else {
+                   throw new ConflictException("Teacher (Profile School: " + teacherSchoolId + ", User School: " + userSchoolId + ") does not belong to your school (ID: " + actorSchoolId + ")");
+                }
+            }
         }
 
         if (assignmentRepository.existsByTeacherIdAndGradeLevelIdAndTermIdAndActiveTrue(
@@ -88,7 +106,10 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
         TeacherClassAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
 
-        if (actor.getRole() != Role.ADMIN && !assignment.getSchool().getId().equals(actor.getSchool().getId())) {
+        System.out.println("Actor school id: " + actor.getSchool().getId());
+        System.out.println("Assignment school id: " + assignment.getSchool().getId());
+
+        if (actor.getRole().equals(Role.SCHOOL_ADMIN) && !assignment.getSchool().getId().equals(actor.getSchool().getId())) {
             throw new ConflictException("You cannot modify assignments outside your school");
         }
 
@@ -99,18 +120,12 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
     @Transactional
     @Override
     public List<TeacherClassAssignmentResponse> getTeacherAssignments(Long teacherId) {
-        return assignmentRepository.findByTeacherId(teacherId).stream()
-                .map(a -> new TeacherClassAssignmentResponse(
-                        a.getId(),
-                        a.getTeacher().getId(),
-                        a.getTeacher().getUser().getFullName(),
-                        a.getSchool().getId(),
-                        a.getGradeLevel().getId(),
-                        a.getGradeLevel().getCode(),
-                        a.getTerm().getId(),
-                        a.isActive(),
-                        a.getCreatedAt()
-                ))
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseGet(() -> teacherRepository.findByUser_Id(teacherId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID or User ID: " + teacherId)));
+
+        return assignmentRepository.findByTeacherId(teacher.getId()).stream()
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -126,7 +141,7 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
                 a.getSchool().getId(),
                 grade.getId(),
                 grade.getCode(),
-                a.getTerm().getId(),
+                a.getTerm().getTermNumber(),
                 a.isActive(),
                 a.getCreatedAt()
         );

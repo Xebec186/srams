@@ -44,4 +44,6 @@ public interface TransferRequestRepository extends JpaRepository<TransferRequest
     Optional<TransferRequest> findActiveTransferForStudent(@Param("studentId") Long studentId);
 
     long countByFromSchoolIdAndStatus(Long schoolId, TransferStatus transferStatus);
+
+    long countByStatus(TransferStatus status);
 }

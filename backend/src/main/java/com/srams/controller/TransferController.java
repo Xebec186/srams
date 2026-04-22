@@ -57,6 +57,13 @@ public class TransferController {
         return ResponseEntity.ok(transferService.rejectTransfer(id, request.reason(), user.getId()));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TransferResponse>> listAll(
+            @RequestParam(required = false) TransferStatus status) {
+        return ResponseEntity.ok(transferService.getAllTransfers(status));
+    }
+
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN') or (hasRole('STUDENT') and @securityService.isOwnStudentRecord(#studentId, authentication))")
     public ResponseEntity<List<TransferResponse>> getByStudent(@PathVariable Long studentId) {

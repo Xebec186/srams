@@ -1,6 +1,7 @@
 package com.srams.service.impl;
 
 import com.srams.dto.response.SchoolStatsResponse;
+import com.srams.dto.response.SystemStatsResponse;
 import com.srams.entity.AttendanceRecord;
 import com.srams.entity.School;
 import com.srams.enums.StudentStatus;
@@ -26,6 +27,44 @@ public class SchoolStatsServiceImpl implements SchoolStatsService {
     private final StudentRepository studentRepository;
     private final TransferRequestRepository transferRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
+
+    @Transactional(readOnly = true)
+    @Override
+    public SystemStatsResponse getSystemStats(LocalDate date) {
+        LocalDate reportDate = date != null ? date : LocalDate.now();
+
+        long totalSchools = schoolRepository.count();
+        long totalStudents = studentRepository.count();
+        long activeStudents = studentRepository.countByStatus(StudentStatus.ACTIVE);
+        long totalTransfers = transferRepository.count();
+        long pendingTransfers = transferRepository.countByStatus(TransferStatus.PENDING);
+
+        // Simple system average attendance rate - in real app, might want more complex query
+        List<AttendanceRecord> records = attendanceRecordRepository
+                .findByAttendanceDateBetween(reportDate, reportDate);
+
+        long present = 0;
+        long late = 0;
+        for (AttendanceRecord r : records) {
+            if (r.getStatus() != null) {
+                if (r.getStatus() == com.srams.enums.AttendanceStatus.PRESENT) present++;
+                else if (r.getStatus() == com.srams.enums.AttendanceStatus.LATE) late++;
+            }
+        }
+
+        double attendanceRate = records.isEmpty() ? 0.0 :
+                Math.round(((present + late) * 10000.0 / records.size())) / 100.0;
+
+        return new SystemStatsResponse(
+                reportDate,
+                totalSchools,
+                totalStudents,
+                activeStudents,
+                totalTransfers,
+                pendingTransfers,
+                attendanceRate
+        );
+    }
 
     @Transactional(readOnly = true)
     @Override

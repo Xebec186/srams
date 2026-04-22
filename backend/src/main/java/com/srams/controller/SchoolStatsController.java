@@ -1,6 +1,7 @@
 package com.srams.controller;
 
 import com.srams.dto.response.SchoolStatsResponse;
+import com.srams.dto.response.SystemStatsResponse;
 import com.srams.service.SchoolStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +20,16 @@ import java.time.LocalDate;
 public class SchoolStatsController {
 
     private final SchoolStatsService schoolStatsService;
+
+    @GetMapping("/system-stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get global system dashboard stats")
+    public ResponseEntity<SystemStatsResponse> getSystemStats(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ResponseEntity.ok(schoolStatsService.getSystemStats(date));
+    }
 
     @GetMapping("/{schoolId}/stats")
     @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN')")

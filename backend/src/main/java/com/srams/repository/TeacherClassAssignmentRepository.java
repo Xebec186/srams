@@ -35,5 +35,5 @@ public interface TeacherClassAssignmentRepository extends JpaRepository<TeacherC
 
     Optional<TeacherClassAssignment> findByIdAndSchoolId(Long id, Long schoolId);
 
-    Optional<TeacherClassAssignment> findByTeacherId(Long teacherId);
+    List<TeacherClassAssignment> findByTeacherId(Long teacherId);
 }

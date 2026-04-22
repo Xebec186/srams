@@ -166,6 +166,15 @@ public class TransferServiceImpl implements TransferService {
                 .map(TransferResponse::from).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<TransferResponse> getAllTransfers(TransferStatus status) {
+        return transferRepository.findAll().stream()
+                .filter(tr -> status == null || tr.getStatus() == status)
+                .map(TransferResponse::from)
+                .collect(Collectors.toList());
+    }
+
     private TransferRequest getTransferOrThrow(Long id) {
         return transferRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transfer request not found"));

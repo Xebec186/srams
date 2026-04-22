@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { usersApi } from "../../api";
+import { useToast } from "../../context/ToastContext";
 
 export default function TeacherForm({ schoolId, onSuccess, onCancel }) {
+  const toast = useToast();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -31,7 +33,12 @@ export default function TeacherForm({ schoolId, onSuccess, onCancel }) {
         role: "TEACHER",
         schoolId,
       });
+      toast.success("Teacher registered successfully");
       onSuccess();
+    } catch (err) {
+      console.error("Teacher creation failed:", err);
+      const message = err.response?.data?.message || "Failed to register teacher. Please check if username/email already exists.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -86,13 +93,16 @@ export default function TeacherForm({ schoolId, onSuccess, onCancel }) {
           />
         </div>
 
-        <input
-          name="password"
-          type="password"
-          value={form.password}
-          className="input mt-3 border border-black/10 p-1 rounded"
-          disabled
-        />
+        <div className="mt-3">
+            <label className="text-xs text-neutral-400">Default Password</label>
+            <input
+                name="password"
+                type="password"
+                value={form.password}
+                className="input border border-black/10 p-1 rounded w-full"
+                disabled
+            />
+        </div>
       </div>
 
       {/* ===== PROFESSIONAL INFO ===== */}
@@ -145,7 +155,7 @@ export default function TeacherForm({ schoolId, onSuccess, onCancel }) {
         <input
           name="phone"
           placeholder="Phone Number"
-          className="input mt-3 border border-black/10 p-1 rounded"
+          className="input mt-3 border border-black/10 p-1 rounded w-full"
           onChange={handleChange}
         />
       </div>

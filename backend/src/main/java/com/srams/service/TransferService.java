@@ -16,5 +16,6 @@ public interface TransferService {
     TransferResponse cancelTransfer(Long transferId, Long cancelledByUserId);
     List<TransferResponse> getTransfersByStudent(Long studentId);
     List<TransferResponse> getTransfersBySchool(Long schoolId, TransferStatus status, String direction);
+    List<TransferResponse> getAllTransfers(TransferStatus status);
     TransferResponse getTransferById(Long id);
 }

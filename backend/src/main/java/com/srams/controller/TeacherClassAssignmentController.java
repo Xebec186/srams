@@ -44,6 +44,14 @@ public class TeacherClassAssignmentController {
         );
     }
 
+    @GetMapping("/teacher/{teacherId}")
+    @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN', 'TEACHER')")
+    public ResponseEntity<List<TeacherClassAssignmentResponse>> getByTeacher(
+            @PathVariable Long teacherId
+    ) {
+        return ResponseEntity.ok(assignmentService.getTeacherAssignments(teacherId));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN')")
     public ResponseEntity<Void> deactivate(

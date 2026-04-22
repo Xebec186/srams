@@ -217,7 +217,7 @@ export function AdminPerformanceReport() {
               <label className="form-label">Term *</label>
               <select className="form-control" value={selectedTerm}
                 onChange={e => setSelectedTerm(e.target.value)}>
-                {terms.map(t => <option key={t.id} value={t.id}>Term {t.termNumber} — {t.academicYear?.label}</option>)}
+                {terms.map(t => <option key={t.id} value={t.id}>Term {t.termNumber} — {t.academicYearLabel}</option>)}
               </select>
             </div>
             <button className="btn btn-primary" onClick={generate}

@@ -89,9 +89,9 @@ public class UserServiceImpl implements UserService {
         User saved = userRepository.save(user);
 
         if (requestedRole == Role.TEACHER) {
-            createTeacherProfile(saved, school, request);
+            createTeacherProfile(saved, user.getSchool(), request);
         } else if (requestedRole == Role.STUDENT) {
-            createStudentProfile(saved, actor, school, request);
+            createStudentProfile(saved, actor, user.getSchool(), request);
         }
 
         return UserResponse.from(saved);
