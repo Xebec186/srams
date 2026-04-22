@@ -9,7 +9,6 @@ import com.srams.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,30 +25,26 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SCHOOL_ADMIN')")
-    public ResponseEntity<UserResponse> create(@RequestBody @Valid CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
+    public ResponseEntity<UserResponse> create(
+            @AuthenticationPrincipal User actor,
+            @RequestBody @Valid CreateUserRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUser(actor.getUsername(), request));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN')")
     public ResponseEntity<Page<UserResponse>> list(
+            @AuthenticationPrincipal User actor,
             @RequestParam(required = false) Long schoolId,
-            @RequestParam(required = false) String role,
-            Pageable pageable,
-            @AuthenticationPrincipal User user) {
-        if (user.getRole() == Role.ADMIN) {
-            if (schoolId != null) {
-                return ResponseEntity.ok(userService.getUsersBySchool(schoolId, pageable));
-            }
-            return ResponseEntity.ok(userService.getUsers(pageable, role));
-        }
-        Page<UserResponse> scoped = userService.getUsersBySchool(user.getSchool().getId(), pageable);
-        if (role == null || role.isBlank()) {
-            return ResponseEntity.ok(scoped);
-        }
-        String roleFilter = role.trim().toUpperCase();
-        var filtered = scoped.getContent().stream().filter(u -> roleFilter.equals(u.role())).toList();
-        return ResponseEntity.ok(new PageImpl<>(filtered, scoped.getPageable(), filtered.size()));
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) String q,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                userService.listUsers(actor.getUsername(), schoolId, role, q, pageable)
+        );
     }
 
     @GetMapping("/{id}")
@@ -60,8 +55,18 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> update(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
+    public ResponseEntity<UserResponse> update(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateUserRequest request
+    ) {
         return ResponseEntity.ok(userService.updateUser(id, request));
+    }
+
+    @PutMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> activate(@PathVariable Long id) {
+        userService.activateUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/deactivate")

@@ -208,6 +208,7 @@ const realUsersApi = {
   update: (id, data) => client.put(`/users/${id}`, data),
   deactivate: (id) => client.put(`/users/${id}/deactivate`),
 };
+
 export const usersApi = realUsersApi;
 
 // ============================================================
@@ -222,3 +223,11 @@ const realReferenceApi = {
   getTerms: (yearId) => client.get(`/academic-years/${yearId}/terms`),
 };
 export const referenceApi = realReferenceApi;
+
+const realTeacherAssignmentsApi = {
+  assign: (data) => client.post("/teacher-assignments", data),
+  list: (params) => client.get("/teacher-assignments", { params }),
+  deactivate: (id) => client.delete(`/teacher-assignments/${id}`),
+};
+
+export const teacherAssignmentsApi = realTeacherAssignmentsApi;
