@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { studentsApi, usersApi, referenceApi } from "../../api";
+import { useToast } from "../../context/ToastContext";
 import {
   PageHeader,
   SearchBar,
@@ -12,36 +13,106 @@ import {
 } from "../../components/common";
 import { formatDate, getStatusBadgeClass } from "../../utils";
 import StudentDetail from "../../components/students/StudentDetail";
+import { FiEye, FiEyeOff, FiRefreshCw } from "react-icons/fi";
 
 function StudentCreateModal({ isOpen, schoolId, onClose, onCreated }) {
+  const toast = useToast();
   const [gradeLevels, setGradeLevels] = useState([]);
+  const [loadingRefs, setLoadingRefs] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     username: "",
     email: "",
     password: "Welcome@123",
+    dateOfBirth: "",
     gender: "",
+    nationality: "Ghanaian",
     gradeLevelId: "",
+    guardianName: "",
+    guardianPhone: "",
+    guardianRelation: "",
+    address: "",
   });
+
+  const setField = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const generatePassword = () => {
+    const chars =
+      "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
+    let generated = "";
+    for (let i = 0; i < 12; i += 1) {
+      generated += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setForm((prev) => ({ ...prev, password: generated }));
+  };
 
   useEffect(() => {
     if (!isOpen) return;
     (async () => {
-      const res = await referenceApi.getGradeLevels();
-      setGradeLevels(res.data || []);
+      setLoadingRefs(true);
+      try {
+        const res = await referenceApi.getGradeLevels();
+        setGradeLevels(res.data || []);
+      } catch (err) {
+        toast.error(
+          err.response?.data?.message || "Failed to load grade levels.",
+        );
+      } finally {
+        setLoadingRefs(false);
+      }
     })();
+  }, [isOpen, toast]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setShowPassword(false);
+    setSubmitting(false);
+    setForm({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      password: "Welcome@123",
+      dateOfBirth: "",
+      gender: "",
+      nationality: "Ghanaian",
+      gradeLevelId: "",
+      guardianName: "",
+      guardianPhone: "",
+      guardianRelation: "",
+      address: "",
+    });
   }, [isOpen]);
 
   const submit = async (e) => {
     e.preventDefault();
-    await usersApi.create({
-      ...form,
-      role: "STUDENT",
-      schoolId,
-      gradeLevelId: form.gradeLevelId ? Number(form.gradeLevelId) : null,
-    });
-    onCreated();
+    if (!schoolId) {
+      toast.error("School context is missing. Please reload and try again.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await usersApi.create({
+        ...form,
+        role: "STUDENT",
+        schoolId,
+        gradeLevelId: Number(form.gradeLevelId),
+      });
+      toast.success("Student account registered successfully.");
+      onCreated();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to register student account.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -53,74 +124,188 @@ function StudentCreateModal({ isOpen, schoolId, onClose, onCreated }) {
       title="Register New Student"
       size="modal-lg"
     >
-      <form onSubmit={submit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input
-            className="input"
-            placeholder="First name"
-            value={form.firstName}
-            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-            required
-          />
-          <input
-            className="input"
-            placeholder="Last name"
-            value={form.lastName}
-            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-            required
-          />
-          <input
-            className="input"
-            placeholder="Username"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-            required
-          />
-          <input
-            className="input"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
-          <input
-            className="input"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required
-          />
-          <select
-            className="input"
-            value={form.gender}
-            onChange={(e) => setForm({ ...form, gender: e.target.value })}
-          >
-            <option value="">Gender</option>
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-          </select>
-          <select
-            className="input md:col-span-2"
-            value={form.gradeLevelId}
-            onChange={(e) => setForm({ ...form, gradeLevelId: e.target.value })}
-          >
-            <option value="">Select grade level</option>
-            {gradeLevels.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.code || g.name}
+      <form onSubmit={submit} className="space-y-6">
+        <section className="space-y-3">
+          <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
+            Student Details
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="First name *"
+              value={form.firstName}
+              onChange={setField("firstName")}
+              required
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Middle name (optional)"
+              value={form.middleName}
+              onChange={setField("middleName")}
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Last name *"
+              value={form.lastName}
+              onChange={setField("lastName")}
+              required
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              type="date"
+              value={form.dateOfBirth}
+              onChange={setField("dateOfBirth")}
+              required
+              title="Date of birth"
+            />
+            <select
+              className="input border border-neutral-200 rounded-xl p-2"
+              value={form.gender}
+              onChange={setField("gender")}
+              required
+            >
+              <option value="">Gender *</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+            <select
+              className="input border border-neutral-200 rounded-xl p-2"
+              value={form.gradeLevelId}
+              onChange={setField("gradeLevelId")}
+              required
+              disabled={loadingRefs}
+            >
+              <option value="">
+                {loadingRefs
+                  ? "Loading grade levels..."
+                  : "Select grade level *"}
               </option>
-            ))}
-          </select>
-        </div>
+              {gradeLevels.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.code || g.name}
+                </option>
+              ))}
+            </select>
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Nationality"
+              value={form.nationality}
+              onChange={setField("nationality")}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
+            Guardian Information
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Guardian name"
+              value={form.guardianName}
+              onChange={setField("guardianName")}
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Guardian phone"
+              value={form.guardianPhone}
+              onChange={setField("guardianPhone")}
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Guardian relation (e.g. Mother)"
+              value={form.guardianRelation}
+              onChange={setField("guardianRelation")}
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2 md:col-span-2"
+              placeholder="Address"
+              value={form.address}
+              onChange={setField("address")}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
+            User Account
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              placeholder="Username *"
+              value={form.username}
+              onChange={setField("username")}
+              required
+            />
+            <input
+              className="input border border-neutral-200 rounded-xl p-2"
+              type="email"
+              placeholder="Email *"
+              value={form.email}
+              onChange={setField("email")}
+              required
+            />
+            <div className="md:col-span-2">
+              <div className="relative">
+                <input
+                  className="input border border-neutral-200 rounded-xl p-2 pr-24"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Temporary password *"
+                  value={form.password}
+                  onChange={setField("password")}
+                  minLength={8}
+                  required
+                />
+                <div className="absolute inset-y-0 right-2 flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="p-1 text-neutral-500 hover:text-neutral-700"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={
+                      showPassword
+                        ? "Hide password value"
+                        : "Show password value"
+                    }
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <FiEyeOff size={16} />
+                    ) : (
+                      <FiEye size={16} />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="p-1 text-neutral-500 hover:text-neutral-700"
+                    onClick={generatePassword}
+                    aria-label="Generate a secure password"
+                    title="Generate password"
+                  >
+                    <FiRefreshCw size={16} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-neutral-500 mt-1">
+                Use at least 8 characters. Student should change this password
+                after first login.
+              </p>
+            </div>
+          </div>
+        </section>
 
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className="btn btn-outline" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary">
-            Create Student
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={submitting}
+          >
+            {submitting ? "Creating..." : "Create Student"}
           </button>
         </div>
       </form>

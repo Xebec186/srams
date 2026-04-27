@@ -93,10 +93,16 @@ export default function AdminDashboard() {
           schools: s.totalSchools,
           students: s.totalStudents,
           transfers: s.totalTransfers,
-          attendanceRate: s.averageAttendanceRate > 0 ? `${s.averageAttendanceRate}%` : "—"
+          attendanceRate:
+            s.averageAttendanceRate > 0 ? `${s.averageAttendanceRate}%` : "—",
         });
       } catch {
-        setStats({ schools: 0, students: 0, transfers: 0, attendanceRate: "—" });
+        setStats({
+          schools: 0,
+          students: 0,
+          transfers: 0,
+          attendanceRate: "—",
+        });
       } finally {
         setLoading(false);
       }
@@ -129,7 +135,7 @@ export default function AdminDashboard() {
         subtitle="Ghana Education Service — Student Records and Attendance Management"
       />
 
-      <div className="stat-grid">
+      <div className="stat-grid flex flex-col sm:flex-row gap-4 mb-6">
         <StatCard
           icon={<IconSchool />}
           value={stats.schools}

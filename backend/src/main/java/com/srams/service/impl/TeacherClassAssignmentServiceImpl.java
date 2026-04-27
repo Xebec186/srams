@@ -25,6 +25,12 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
     private final GradeLevelRepository gradeLevelRepository;
     private final TermRepository termRepository;
 
+    private Teacher resolveTeacherByIdOrUserId(Long inputId) {
+        return teacherRepository.findByUser_Id(inputId)
+                .or(() -> teacherRepository.findById(inputId))
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID or User ID: " + inputId));
+    }
+
     @Transactional
     @Override
     public TeacherClassAssignmentResponse assignTeacher(String actorUsername, AssignTeacherToClassRequest request) {
@@ -39,9 +45,7 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
                 ? null
                 : actor.getSchool();
 
-        Teacher teacher = teacherRepository.findById(request.teacherId())
-                .orElseGet(() -> teacherRepository.findByUser_Id(request.teacherId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID or User ID: " + request.teacherId())));
+        Teacher teacher = resolveTeacherByIdOrUserId(request.teacherId());
 
         if (scopeSchool != null) {
             Long teacherSchoolId = teacher.getSchool().getId();
@@ -86,6 +90,10 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
         User actor = userRepository.findByUsername(actorUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        if (actor.getRole() == Role.SCHOOL_ADMIN && actor.getSchool() == null) {
+            throw new ConflictException("Your account is not linked to any school");
+        }
+
         Long effectiveSchoolId = actor.getRole() == Role.ADMIN
                 ? schoolId
                 : actor.getSchool().getId();
@@ -106,9 +114,6 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
         TeacherClassAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
 
-        System.out.println("Actor school id: " + actor.getSchool().getId());
-        System.out.println("Assignment school id: " + assignment.getSchool().getId());
-
         if (actor.getRole().equals(Role.SCHOOL_ADMIN) && !assignment.getSchool().getId().equals(actor.getSchool().getId())) {
             throw new ConflictException("You cannot modify assignments outside your school");
         }
@@ -119,10 +124,24 @@ public class TeacherClassAssignmentServiceImpl implements TeacherClassAssignment
 
     @Transactional
     @Override
-    public List<TeacherClassAssignmentResponse> getTeacherAssignments(Long teacherId) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseGet(() -> teacherRepository.findByUser_Id(teacherId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID or User ID: " + teacherId)));
+    public List<TeacherClassAssignmentResponse> getTeacherAssignments(String actorUsername, Long teacherId) {
+        User actor = userRepository.findByUsername(actorUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Teacher teacher = resolveTeacherByIdOrUserId(teacherId);
+
+        if (actor.getRole() == Role.SCHOOL_ADMIN) {
+            if (actor.getSchool() == null) {
+                throw new ConflictException("Your account is not linked to any school");
+            }
+            if (teacher.getSchool() == null || !actor.getSchool().getId().equals(teacher.getSchool().getId())) {
+                throw new ConflictException("You cannot view assignments outside your school");
+            }
+        }
+
+        if (actor.getRole() == Role.TEACHER && !actor.getId().equals(teacher.getUser().getId())) {
+            throw new ConflictException("You can only view your own assignments");
+        }
 
         return assignmentRepository.findByTeacherId(teacher.getId()).stream()
                 .map(this::toResponse)

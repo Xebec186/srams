@@ -10,11 +10,22 @@ import { authApi, registerAuthHandlers } from "../api";
 
 const AuthContext = createContext(null);
 
+function normalizeRole(role) {
+  if (!role) return role;
+  const value = String(role).toUpperCase();
+  return value.startsWith("ROLE_") ? value.slice(5) : value;
+}
+
+function normalizeStoredUser(user) {
+  if (!user) return null;
+  return { ...user, role: normalizeRole(user.role) };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem("srams_user");
-      return stored ? JSON.parse(stored) : null;
+      return stored ? normalizeStoredUser(JSON.parse(stored)) : null;
     } catch {
       return null;
     }
@@ -42,7 +53,7 @@ export function AuthProvider({ children }) {
     const userData = {
       token,
       refreshToken,
-      role,
+      role: normalizeRole(role),
       fullName,
       userId,
       schoolId,

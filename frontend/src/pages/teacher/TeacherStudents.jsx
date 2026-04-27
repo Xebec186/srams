@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { studentsApi, referenceApi } from "../../api";
+import { studentsApi, teacherAssignmentsApi } from "../../api";
 import {
   PageHeader,
   SearchBar,
@@ -15,17 +15,43 @@ import StudentDetail from "../../components/students/StudentDetail";
 export default function TeacherStudents() {
   const { user } = useAuth();
   const schoolId = user?.schoolId;
+  const teacherId = user?.userId;
 
   const [students, setStudents] = useState([]);
-  const [grades, setGrades] = useState([]);
+  const [assignedGrades, setAssignedGrades] = useState([]);
   const [selectedGrade, setSelectedGrade] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingAssignments, setLoadingAssignments] = useState(true);
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    referenceApi.getGradeLevels().then((r) => setGrades(r.data));
-  }, []);
+    if (!teacherId) {
+      setAssignedGrades([]);
+      setLoadingAssignments(false);
+      return;
+    }
+    setLoadingAssignments(true);
+    teacherAssignmentsApi
+      .getByTeacher(teacherId)
+      .then((r) => {
+        const uniqueByGrade = new Map();
+        (r.data || [])
+          .filter((a) => a.active)
+          .forEach((a) => {
+            if (!uniqueByGrade.has(String(a.gradeLevelId))) {
+              uniqueByGrade.set(String(a.gradeLevelId), {
+                id: String(a.gradeLevelId),
+                code: a.gradeLevelCode,
+                label: a.gradeLevelCode,
+              });
+            }
+          });
+        setAssignedGrades(Array.from(uniqueByGrade.values()));
+      })
+      .catch(() => setAssignedGrades([]))
+      .finally(() => setLoadingAssignments(false));
+  }, [teacherId]);
 
   const load = useCallback(async () => {
     if (!schoolId || !selectedGrade) return;
@@ -70,9 +96,9 @@ export default function TeacherStudents() {
             onChange={(e) => setSelectedGrade(e.target.value)}
           >
             <option value="">Select your class...</option>
-            {grades.map((g) => (
+            {assignedGrades.map((g) => (
               <option key={g.id} value={g.id}>
-                {g.name}
+                {g.label}
               </option>
             ))}
           </select>
@@ -88,7 +114,19 @@ export default function TeacherStudents() {
         )}
       </div>
 
-      {!selectedGrade ? (
+      {loadingAssignments ? (
+        <Spinner center />
+      ) : assignedGrades.length === 0 ? (
+        <div className="card p-12 text-center text-neutral-400">
+          <div className="text-lg font-semibold text-neutral-600 mb-2">
+            No Assigned Classes
+          </div>
+          <div className="text-sm">
+            You have not been assigned to any class yet. Contact your school
+            admin.
+          </div>
+        </div>
+      ) : !selectedGrade ? (
         <div className="card p-12 text-center text-neutral-400">
           <div className="text-4xl mb-3">teacher</div>
           <div className="text-lg font-semibold text-neutral-600 mb-2">

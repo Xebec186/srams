@@ -8,6 +8,6 @@ import java.util.List;
 public interface TeacherClassAssignmentService {
     TeacherClassAssignmentResponse assignTeacher(String actorUsername, AssignTeacherToClassRequest request);
     List<TeacherClassAssignmentResponse> listAssignments(String actorUsername, Long schoolId, Integer termId, Short gradeLevelId);
-    List<TeacherClassAssignmentResponse> getTeacherAssignments(Long teacherId);
+    List<TeacherClassAssignmentResponse> getTeacherAssignments(String actorUsername, Long teacherId);
     void deactivate(String actorUsername, Long assignmentId);
 }

@@ -13,7 +13,12 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!studentId) return;
+    if (!studentId) {
+      setLoading(false);
+      setSummary(null);
+      setResults([]);
+      return;
+    }
     async function load() {
       try {
         const yRes = await referenceApi.getCurrentYear();

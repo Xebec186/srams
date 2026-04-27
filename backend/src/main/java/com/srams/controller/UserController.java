@@ -48,9 +48,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN')")
-    public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    @PreAuthorize("hasAnyRole('ADMIN','SCHOOL_ADMIN','TEACHER','STUDENT')")
+    public ResponseEntity<UserResponse> getById(
+            @AuthenticationPrincipal User actor,
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(userService.getUserById(actor.getUsername(), id));
     }
 
     @PutMapping("/{id}")

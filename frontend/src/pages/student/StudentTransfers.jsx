@@ -53,7 +53,11 @@ export default function StudentTransfers() {
   const [submitting, setSubmitting] = useState(false);
 
   const load = () => {
-    if (!studentId) return;
+    if (!studentId) {
+      setTransfers([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     transfersApi
       .getByStudent(studentId)

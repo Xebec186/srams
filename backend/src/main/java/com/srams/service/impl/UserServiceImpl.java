@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -125,9 +123,28 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(String actorUsername, Long id) {
+        User actor = userRepository.findByUsername(actorUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+
+        if (actor.getRole() == Role.TEACHER || actor.getRole() == Role.STUDENT) {
+            if (!actor.getId().equals(id)) {
+                throw new ConflictException("You can only view your own profile");
+            }
+        }
+
+        if (actor.getRole() == Role.SCHOOL_ADMIN) {
+            if (actor.getSchool() == null) {
+                throw new ConflictException("Your account is not linked to a school");
+            }
+            if (u.getSchool() == null || !actor.getSchool().getId().equals(u.getSchool().getId())) {
+                throw new ConflictException("You can only view profiles from your school");
+            }
+        }
+
         return UserResponse.from(u);
     }
 
@@ -231,7 +248,9 @@ public class UserServiceImpl implements UserService {
         student.setStatus(StudentStatus.ACTIVE);
         student.setCreatedBy(actor);
 
-        studentRepository.save(student);
+        Student savedStudent = studentRepository.save(student);
+        saved.setStudent(savedStudent);
+        userRepository.save(saved);
     }
 
     private String resolveStudentUsid(String providedUsid, School school, User saved) {

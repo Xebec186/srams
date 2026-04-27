@@ -19,6 +19,7 @@ const NAV_CONFIG = {
       section: "Overview",
       links: [
         { to: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
+        { to: "/admin/profile", label: "My Profile", icon: "student" },
       ],
     },
     {
@@ -62,6 +63,7 @@ const NAV_CONFIG = {
       section: "Overview",
       links: [
         { to: "/school/dashboard", label: "Dashboard", icon: "dashboard" },
+        { to: "/school/profile", label: "My Profile", icon: "student" },
       ],
     },
     {
@@ -87,6 +89,7 @@ const NAV_CONFIG = {
       section: "Overview",
       links: [
         { to: "/teacher/dashboard", label: "Dashboard", icon: "dashboard" },
+        { to: "/teacher/profile", label: "My Profile", icon: "student" },
       ],
     },
     {
@@ -179,7 +182,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="sidebar-nav flex-grow" aria-label="Primary navigation">
+      <nav className="sidebar-nav grow" aria-label="Primary navigation">
         {sections.map((section) => (
           <div key={section.section} className="sidebar-section">
             <div className="sidebar-section-label">{section.section}</div>

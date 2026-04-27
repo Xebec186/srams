@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
-import { studentsApi, attendanceApi, referenceApi } from "../../api";
+import {
+  studentsApi,
+  attendanceApi,
+  referenceApi,
+  teacherAssignmentsApi,
+} from "../../api";
 import { PageHeader, Spinner } from "../../components/common";
 
 const STATUS_OPTIONS = ["PRESENT", "ABSENT", "LATE", "EXCUSED"];
@@ -29,18 +34,33 @@ export default function TeacherAttendance() {
 
   useEffect(() => {
     async function loadRef() {
-      const [gRes, yRes] = await Promise.all([
-        referenceApi.getGradeLevels(),
-        referenceApi.getCurrentYear(),
-      ]);
-      setGrades(gRes.data);
-      const t = await referenceApi.getTerms(yRes.data.id);
-      setTerms(t.data);
-      if (t.data.length > 0)
-        setSelectedTerm(String(t.data[t.data.length - 1].id));
+      try {
+        const [assignRes, yRes] = await Promise.all([
+          teacherAssignmentsApi.getByTeacher(user?.userId),
+          referenceApi.getCurrentYear(),
+        ]);
+        const assigned = [];
+        const seen = new Set();
+        (assignRes.data || [])
+          .filter((a) => a.active)
+          .forEach((a) => {
+            const key = String(a.gradeLevelId);
+            if (!seen.has(key)) {
+              seen.add(key);
+              assigned.push({ id: String(a.gradeLevelId), name: a.gradeLevelCode });
+            }
+          });
+        setGrades(assigned);
+        const t = await referenceApi.getTerms(yRes.data.id);
+        setTerms(t.data);
+        if (t.data.length > 0)
+          setSelectedTerm(String(t.data[t.data.length - 1].id));
+      } catch {
+        setGrades([]);
+      }
     }
     loadRef();
-  }, []);
+  }, [user?.userId]);
 
   useEffect(() => {
     if (!selectedGrade || !user?.schoolId) return;
@@ -278,6 +298,13 @@ export default function TeacherAttendance() {
             </div>
           </div>
         ))}
+      {!selectedGrade && grades.length === 0 && (
+        <div className="card">
+          <div className="p-8 text-center text-neutral-400 text-sm">
+            You have no active class assignments yet.
+          </div>
+        </div>
+      )}
     </div>
   );
 }

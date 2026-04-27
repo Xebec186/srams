@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
-import { studentsApi, performanceApi, referenceApi } from "../../api";
+import {
+  studentsApi,
+  performanceApi,
+  referenceApi,
+  teacherAssignmentsApi,
+} from "../../api";
 import { PageHeader, Spinner, StatCard } from "../../components/common";
 
 export default function TeacherGrades() {
@@ -22,12 +27,23 @@ export default function TeacherGrades() {
   useEffect(() => {
     async function loadRef() {
       try {
-        const [gRes, sRes, yRes] = await Promise.all([
-          referenceApi.getGradeLevels(),
+        const [assignRes, sRes, yRes] = await Promise.all([
+          teacherAssignmentsApi.getByTeacher(user?.userId),
           referenceApi.getSubjects(),
           referenceApi.getCurrentYear(),
         ]);
-        setGrades(gRes.data);
+        const assigned = [];
+        const seen = new Set();
+        (assignRes.data || [])
+          .filter((a) => a.active)
+          .forEach((a) => {
+            const key = String(a.gradeLevelId);
+            if (!seen.has(key)) {
+              seen.add(key);
+              assigned.push({ id: String(a.gradeLevelId), name: a.gradeLevelCode });
+            }
+          });
+        setGrades(assigned);
         setSubjects(sRes.data);
         const tRes = await referenceApi.getTerms(yRes.data.id);
         setTerms(tRes.data);
@@ -41,7 +57,7 @@ export default function TeacherGrades() {
       }
     }
     loadRef();
-  }, [toastError]);
+  }, [toastError, user?.userId]);
 
   // Load students and existing grades
   const loadData = useCallback(async () => {

@@ -12,7 +12,7 @@ public interface UserService {
     Page<UserResponse> listUsers(String actorUsername, Long schoolId, Role role, String q, Pageable pageable);
     Page<UserResponse> getUsersBySchool(Long schoolId, Pageable pageable);
     Page<UserResponse> getUsers(Pageable pageable, String role);
-    UserResponse getUserById(Long id);
+    UserResponse getUserById(String actorUsername, Long id);
     UserResponse updateUser(Long id, UpdateUserRequest request);
     void deactivateUser(Long id);
     void activateUser(Long id);

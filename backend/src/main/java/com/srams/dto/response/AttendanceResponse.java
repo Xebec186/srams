@@ -17,6 +17,7 @@ public record AttendanceResponse(
         Period period,
         AttendanceStatus status,
         String absenceReason,
+        Long markedByUserId,
         String markedByName) {
 
     public static AttendanceResponse from(AttendanceRecord r) {
@@ -34,6 +35,7 @@ public record AttendanceResponse(
                 r.getPeriod(),
                 r.getStatus(),
                 r.getAbsenceReason(),
+                m != null ? m.getId() : null,
                 m != null ? m.getFullName() : null
         );
     }

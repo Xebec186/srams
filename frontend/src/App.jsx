@@ -25,6 +25,7 @@ import {
   AdminPerformanceReport,
 } from "./pages/admin/AdminReports";
 import AcademicYearsPage from "./pages/admin/AcademicYearsPage";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 // School Admin Pages
 import SchoolDashboard from "./pages/school-admin/SchoolDashboard";
@@ -34,12 +35,14 @@ import SchoolTransfers from "./pages/school-admin/SchoolTransfers";
 import SchoolAttendance from "./pages/school-admin/SchoolAttendance";
 import SchoolGrades from "./pages/school-admin/SchoolGrades";
 import SchoolReports from "./pages/school-admin/SchoolReports";
+import SchoolAdminProfile from "./pages/school-admin/SchoolAdminProfile";
 
 // Teacher Pages
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherGrades from "./pages/teacher/TeacherGrades";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
 
 // Student Pages
 import StudentDashboard from "./pages/student/StudentDashboard";
@@ -159,6 +162,7 @@ function AppRoutes() {
               path="/admin/academic-years"
               element={<AcademicYearsPage />}
             />
+            <Route path="/admin/profile" element={<AdminProfile />} />
           </Route>
 
           {/* ---- SCHOOL ADMIN routes ---- */}
@@ -170,11 +174,13 @@ function AppRoutes() {
             <Route path="/school/attendance" element={<SchoolAttendance />} />
             <Route path="/school/grades" element={<SchoolGrades />} />
             <Route path="/school/reports" element={<SchoolReports />} />
+            <Route path="/school/profile" element={<SchoolAdminProfile />} />
           </Route>
 
           {/* ---- TEACHER routes ---- */}
           <Route element={<RequireRole roles={["TEACHER"]} />}>
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+            <Route path="/teacher/profile" element={<TeacherProfile />} />
             <Route path="/teacher/attendance" element={<TeacherAttendance />} />
             <Route path="/teacher/grades" element={<TeacherGrades />} />
             <Route path="/teacher/students" element={<TeacherStudents />} />

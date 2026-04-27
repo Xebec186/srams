@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { StatCard, PageHeader, Spinner } from "../../components/common";
-import { referenceApi, attendanceApi } from "../../api";
+import { referenceApi, attendanceApi, teacherAssignmentsApi } from "../../api";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -15,36 +15,63 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     async function loadStats() {
-      if (!user?.schoolId) return;
+      if (!user?.schoolId || !user?.userId) {
+        setLoading(false);
+        return;
+      }
       try {
         const today = new Date().toISOString().split("T")[0];
-        // Fetch grades to find student's grade level ID.
-        // Assuming teacher is associated with a grade or can select one.
-        // For dashboard summary, fetch for a default or first grade.
-        const gRes = await referenceApi.getGradeLevels();
-        if (gRes.data.length > 0) {
-          const res = await attendanceApi.getClassAttendance({
-            schoolId: user.schoolId,
-            date: today,
-            gradeLevelId: gRes.data[0].id,
-          });
+        const [assignmentRes, yearRes] = await Promise.all([
+          teacherAssignmentsApi.getByTeacher(user.userId),
+          referenceApi.getCurrentYear(),
+        ]);
+        const assignedGrades = Array.from(
+          new Set(
+            (assignmentRes.data || [])
+              .filter((a) => a.active)
+              .map((a) => String(a.gradeLevelId)),
+          ),
+        );
 
-          const data = res.data || [];
-          const stats = data.reduce(
-            (acc, curr) => {
-              acc.total += 1;
-              if (curr.status === "PRESENT") acc.present += 1;
-              else if (curr.status === "ABSENT") acc.absent += 1;
-              else if (curr.status === "LATE") acc.late += 1;
-              return acc;
-            },
-            { total: 0, present: 0, absent: 0, late: 0 },
+        if (assignedGrades.length === 0) {
+          setStats({ total: 0, present: 0, absent: 0, late: 0 });
+          return;
+        }
+
+        const termsRes = await referenceApi.getTerms(yearRes.data.id);
+        const termIds = new Set((termsRes.data || []).map((t) => Number(t.id)));
+        const classAttendanceResults = await Promise.all(
+          assignedGrades.map((gradeLevelId) =>
+            attendanceApi.getClassAttendance({
+              schoolId: user.schoolId,
+              date: today,
+              gradeLevelId,
+            }),
+          ),
+        );
+
+        const teacherRecords = classAttendanceResults
+          .flatMap((r) => r.data || [])
+          .filter(
+            (r) =>
+              Number(r.markedByUserId) === Number(user.userId) &&
+              termIds.has(Number(r.termId)),
           );
 
-          setStats(stats);
-        }
+        const computed = teacherRecords.reduce(
+          (acc, curr) => {
+            acc.total += 1;
+            if (curr.status === "PRESENT") acc.present += 1;
+            else if (curr.status === "ABSENT") acc.absent += 1;
+            else if (curr.status === "LATE") acc.late += 1;
+            return acc;
+          },
+          { total: 0, present: 0, absent: 0, late: 0 },
+        );
+        setStats(computed);
       } catch (e) {
         console.error("Failed to load attendance stats", e);
+        setStats({ total: 0, present: 0, absent: 0, late: 0 });
       } finally {
         setLoading(false);
       }
